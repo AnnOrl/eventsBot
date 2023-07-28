@@ -5,7 +5,7 @@ moment.locale("ru");
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 
-import { readFile } from "../utils.js";
+import { extractDateAndTimeAfisha, readFile } from "../utils.js";
 moment.locale("ru");
 
 import { saveEvents } from "./parseEvents.js";
@@ -20,7 +20,7 @@ const getAfishaEvents = async ({ data }, date) => {
       "\nАнализ AfishaMD, " + moment(date).format("DD MMMM"),
       links.length
     );
-    console.log(dom.window.document.querySelectorAll("p"));
+
     for (let i = 0; i < links.length; i++) {
       const { events: savedEvents } = readFile("data/events.json");
       const { checkin = [] } = readFile("data/check.json");
@@ -36,19 +36,15 @@ const getAfishaEvents = async ({ data }, date) => {
           const name = dom.window.document.querySelector(".eOWIPu").innerHTML;
           const img = dom.window.document.querySelector(".dxDuSn img").src;
           const text = dom.window.document.querySelector(".bdVcrM").textContent;
-          const price = dom.window.document
-            .querySelector(".cRekYi.text")
-            .textContent.replace(/\n/g, "");
-          const match = dom.window.document
-            .querySelector(".sc-rj43u4-6 cRekYi.text")
-            .textContent.replace(/\n/g, "")
-            .match(/\b(\d{1,2}):(\d{2})\b/);
-          const hEvent = (match && match[1]) || "";
-          const mEvent = (match && match[2]) || "";
-          const timeEvent = hEvent && mEvent ? hEvent + ":" + mEvent : "";
-          const location = dom.window.document
-            .querySelector(".cRekYi.text")
-            .textContent.replace(/\n/g, "");
+
+          const allData = dom.window.document.querySelectorAll(
+            ".sc-rj43u4-6.cRekYi.text"
+          );
+          const location = allData[0].textContent.replace(/\n/g, "");
+          const price = allData[4].textContent.replace(/\n/g, "");
+
+          const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
+            extractDateAndTimeITickets(allData[2].textContent);
 
           saveEvents({
             img,
@@ -57,10 +53,13 @@ const getAfishaEvents = async ({ data }, date) => {
             text,
             linkHref,
             date,
+            textDate,
             timeEvent,
             location,
             hEvent,
             mEvent,
+            dateStart,
+            dateEnd,
           });
         });
       }

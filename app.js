@@ -31,7 +31,7 @@ getUpdates();
 setInterval(getUpdates, 6000);
 
 // getEvents();
-// getTodayEvents();
+getTodayEvents();
 // setInterval(getEvents, 21600000); //6h
 // setInterval(getTodayEvents, 3600000); //1h
 

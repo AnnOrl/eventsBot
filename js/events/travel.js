@@ -5,7 +5,7 @@ moment.locale("ru");
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 
-import { readFile } from "../utils.js";
+import { extractDateAndTimeTravel, readFile } from "../utils.js";
 moment.locale("ru");
 
 import { saveEvents } from "./parseEvents.js";
@@ -56,40 +56,16 @@ const getTravels = async (data) => {
             .querySelector(".event__blk--period")
             .textContent.replaceAll(" ", "")
             .replaceAll("\n", "");
-          // const dateEl = eventInfo
-          //   .querySelector(".event__blk--period")
-          //   .innerText.replaceAll("\n", " ");
-          // console.log("dateEl '", dateEl, "'");
-          // const regex = /(?:^|\s)0?(\d{1,2})(\S+)/;
-          const regex = /(?:^|\s)0?(\d{1,2})(?:\s*-\s*\d{1,2})?\s*(\S+)/i;
-          const dateMatch = dateEl.match(regex);
+          const { dateStart, dateEnd, textDate } =
+            extractDateAndTimeTravel(dateEl);
 
-          const months = {
-            января: "Jan",
-            февраля: "Feb",
-            марта: "Mar",
-            апреля: "Apr",
-            мая: "May",
-            июня: "Jun",
-            июля: "July",
-            августа: "August",
-            сентября: "Sep",
-            октября: "October",
-            ноября: "November",
-            декабря: "December",
-          };
-          // console.log("dateMatch", dateMatch);
-
-          const date = moment(
-            Date.parse(
-              `${dateMatch[1]} ${months[dateMatch[2]]} ${moment().year()}`
-            )
-          );
+          const date = moment(Date.parse(`${dateStart}-${moment().year()}`));
 
           const match = text.textContent?.match(/\b(\d{1,2}):(\d{2})\b/);
           const hEvent = (match && match[1]) || "";
           const mEvent = (match && match[2]) || "";
           const timeEvent = hEvent && mEvent ? hEvent + ":" + mEvent : "";
+
           await saveEvents({
             img,
             name,
@@ -101,13 +77,16 @@ const getTravels = async (data) => {
             location,
             hEvent,
             mEvent,
+            dateStart,
+            dateEnd,
+            textDate,
           });
           needEncode = true;
         });
       }
     }
   } catch (e) {
-    console.log("ERROR");
+    console.log("ERROR", e);
     if (needEncode) {
       needEncode = false;
       await getTravels(data);

@@ -39,20 +39,10 @@ const newCommand = async (message) => {
   if (message.from.id !== +config.telegram.my_chat_id) {
     return;
   }
-  //{
-  // img,
-  // name,
-  // price,
-  // text,
-  // linkHref,
-  // filterDate,
-  // timeEvent,
-  // location
-  //}
 
   try {
     const body = message.text.replace("/newpost ", "").replace("\n", "");
-    console.log("newCommand try", body);
+
     const {
       img = "",
       name = "",
@@ -62,19 +52,25 @@ const newCommand = async (message) => {
       date = "",
       timeEvent = "",
       location = "",
+      dateStart = "",
+      dateEnd = "",
+      textDate = "",
     } = JSON.parse(body);
 
     const { message_id: check_message_id, text: postText } =
-      await chatGPTRequest(
+      await chatGPTRequest({
         img,
         name,
         price,
         text,
         linkHref,
-        date,
+        date: textDate || date,
         timeEvent,
-        location
-      );
+        location,
+        dateStart,
+        dateEnd,
+      });
+
     const { events: savedEvents } = readFile("data/check.json");
     let newEvents = { ...savedEvents };
 
@@ -87,13 +83,29 @@ const newCommand = async (message) => {
       location,
       linkHref,
       postText,
+      dateStart,
+      dateEnd,
+      timeEvent,
+      textDate: textDate || date,
     };
 
     writeActualFile("data/check.json", "events", newEvents);
   } catch (e) {
     console.log("не удалось определить тело запроса", e);
     sendMessage(
-      `Не удалось распарсить данные из "` + message.text + `"`,
+      `Не удалось, попробуйте использовать следующий шаблон "{
+        "img": "https://api.livetickets.md/storage/shows/2745/conversions/slide.jpg",
+        "name": "Фестиваль пчел",
+        "price": "",
+        "text": "Добро пожаловать на фестиваль пчел",
+        "linkHref": "",
+        "date": "09-09-2023",
+        "timeEvent": "10:00",
+        "location": "центр",
+        "dateStart": "09-09",
+        "dateEnd": "10-09",
+        "textDate": "9-10 сентября"
+      }"`,
       message.from.id,
       {
         disable_web_page_preview: true,

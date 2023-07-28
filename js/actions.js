@@ -19,9 +19,7 @@ const rewriteEvent = ({ message }) => {
   writeActualFile(
     "data/check.json",
     "checkin",
-    checkin.filter((href) => {
-      href !== linkHref;
-    })
+    checkin.filter((href) => href !== linkHref)
   );
 
   deleteMessage(message.chat.id, message.message_id);
@@ -31,7 +29,7 @@ const sendEvent = async (img, text, href) => {
   const { message_id } = await sendPhoto(
     img,
     text,
-    config.telegram.channel_chat_id,
+    config.telegram.channel_chat_id, //!!!!
     href ? [[{ text: "Перейти по ссылке", url: href }]] : null
   );
 
@@ -40,7 +38,7 @@ const sendEvent = async (img, text, href) => {
 
 const publishEvent = async ({ message }) => {
   console.log("publish");
-  const { events: checkEvents, checkin = [] } = readFile("data/check.json");
+  const { events: checkEvents, checkin } = readFile("data/check.json");
 
   const { postText, check_message_id, linkHref, ...currentEvent } =
     checkEvents[message.message_id];
@@ -62,12 +60,11 @@ const publishEvent = async ({ message }) => {
     ...checkEvents,
     [message.message_id]: undefined,
   });
+
   writeActualFile(
     "data/check.json",
     "checkin",
-    checkin.filter((href) => {
-      href !== linkHref;
-    })
+    checkin.filter((href) => href !== linkHref)
   );
 
   deleteMessage(message.chat.id, message.message_id);

@@ -5,7 +5,11 @@ moment.locale("ru");
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 
-import { readFile, waitOneMinute } from "../utils.js";
+import {
+  extractDateAndTimeITickets,
+  readFile,
+  waitOneMinute,
+} from "../utils.js";
 moment.locale("ru");
 
 import { saveEvents } from "./parseEvents.js";
@@ -43,16 +47,20 @@ const getITicketEvents = async ({ data }, date) => {
           const price = dom.window.document
             .querySelector(".price_title")
             .textContent.replace(/\n/g, "");
-          const match = dom.window.document
+          const timeS = dom.window.document
             .querySelector(".date-time-location .time")
-            .textContent.replace(/\n/g, "")
-            .match(/\b(\d{1,2}):(\d{2})\b/);
-          const hEvent = (match && match[1]) || "";
-          const mEvent = (match && match[2]) || "";
-          const timeEvent = hEvent && mEvent ? hEvent + ":" + mEvent : "";
+            .textContent.replace(/\n/g, "");
+
+          const dateS = dom.window.document
+            .querySelector(".date-time-location .date")
+            .textContent.replace(/\n/g, "");
+
           const location = dom.window.document
             .querySelector(".date-time-location .location")
             .textContent.replace(/\n/g, "");
+
+          const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
+            extractDateAndTimeITickets(dateS + " " + timeS);
 
           await saveEvents({
             img,
@@ -61,10 +69,13 @@ const getITicketEvents = async ({ data }, date) => {
             text,
             linkHref,
             date,
-            timeEvent,
             location,
+            dateStart,
+            dateEnd,
             hEvent,
             mEvent,
+            timeEvent,
+            textDate,
           });
         });
       }

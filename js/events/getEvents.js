@@ -152,7 +152,7 @@ const getTodayEvents = () => {
 
     writeActualFile(
       "data/events.json",
-      "everyDayAnnouncementDate",
+      "everyTomorrowAnnouncementDate",
       today.valueOf()
     );
   }

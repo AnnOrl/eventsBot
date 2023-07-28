@@ -5,7 +5,7 @@ moment.locale("ru");
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 
-import { readFile } from "../utils.js";
+import { extractDateAndTimeLifetickets, readFile } from "../utils.js";
 moment.locale("ru");
 
 import { saveEvents } from "./parseEvents.js";
@@ -43,11 +43,11 @@ const getLifeticketsEvents = async ({ data }, date) => {
             .replace(/  /g, "");
           const match = dom.window.document
             .querySelector("div[property=startDate]")
-            .textContent.replace(/\n/g, "")
-            .match(/\b(\d{1,2}):(\d{2})\b/);
-          const hEvent = (match && match[1]) || "";
-          const mEvent = (match && match[2]) || "";
-          const timeEvent = hEvent && mEvent ? hEvent + ":" + mEvent : "";
+            .textContent.replace(/\n/g, "");
+
+          const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
+            extractDateAndTimeLifetickets(match);
+
           const location = dom.window.document
             .querySelector("div[typeof=Place] div[property=name]")
             .textContent.replace(/\n/g, "");
@@ -63,6 +63,9 @@ const getLifeticketsEvents = async ({ data }, date) => {
             location,
             hEvent,
             mEvent,
+            dateStart,
+            dateEnd,
+            textDate,
           });
         });
       }

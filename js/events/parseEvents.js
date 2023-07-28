@@ -15,16 +15,23 @@ const saveEvents = async ({
   location,
   hEvent,
   mEvent,
+  dateStart,
+  dateEnd,
+  textDate,
 }) => {
   const { message_id: check_message_id, text: postText } = await chatGPTRequest(
-    img,
-    name,
-    price,
-    text,
-    linkHref,
-    date,
-    timeEvent,
-    location
+    {
+      img,
+      name,
+      price,
+      text,
+      linkHref,
+      date: textDate || date,
+      timeEvent,
+      location,
+      dateStart,
+      dateEnd,
+    }
   );
 
   const { events: savedEvents, checkin } = readFile("data/check.json");
@@ -39,6 +46,10 @@ const saveEvents = async ({
     location,
     linkHref,
     postText,
+    dateStart,
+    dateEnd,
+    timeEvent,
+    textDate: textDate || date,
   };
 
   writeActualFile("data/check.json", "events", newEvents);
