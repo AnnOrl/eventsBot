@@ -30,10 +30,10 @@ app.use(express.static(path.join(__dirname, "public")));
 getUpdates();
 setInterval(getUpdates, 6000);
 
-// getEvents();
+getEvents();
 getTodayEvents();
-// setInterval(getEvents, 21600000); //6h
-// setInterval(getTodayEvents, 3600000); //1h
+setInterval(getEvents, 21600000); //6h
+setInterval(getTodayEvents, 3600000); //1h
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
