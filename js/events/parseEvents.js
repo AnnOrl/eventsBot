@@ -26,11 +26,12 @@ const saveEvents = async ({
       price,
       text,
       linkHref,
-      date: textDate || date,
+      date,
       timeEvent,
       location,
       dateStart,
       dateEnd,
+      textDate,
     }
   );
 

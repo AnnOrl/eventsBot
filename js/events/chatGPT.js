@@ -36,8 +36,10 @@ const chatGPTRequest = async ({
   location,
   dateStart,
   dateEnd,
+  textDate,
 }) => {
   console.log("\nАнализ chatGPT");
+
   try {
     let res = { text };
     if (process.env.MODE !== "no-gpt") {
@@ -80,8 +82,12 @@ const chatGPTRequest = async ({
                 ? `\n💰 ${price || textPrice}`
                 : ""
             }${
-              date !== "" || !!filterDate
-                ? `\n🗓️ ${date || moment(filterDate).format("D MMMM, dddd")}`
+              date !== "" || !!textDate || !!filterDate
+                ? `\n🗓️ ${
+                    date ||
+                    textDate ||
+                    moment(new Date(filterDate)).format("D MMMM, dddd")
+                  }`
                 : ""
             }${timeEvent !== "" ? `\n🕒 ${timeEvent}` : ""}${
               place !== "" || location !== "" ? `\n📍 ${place || location}` : ""
@@ -139,16 +145,19 @@ const chatGPTRequest = async ({
   } catch (e) {
     console.log("\nОшибка", e);
     await waitOneHour();
-    return chatGPTRequest(
+    return chatGPTRequest({
       img,
       name,
       price,
       text,
       linkHref,
-      filterDate,
+      date: filterDate,
       timeEvent,
-      location
-    );
+      location,
+      dateStart,
+      dateEnd,
+      textDate,
+    });
   }
 };
 

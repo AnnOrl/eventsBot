@@ -10,7 +10,7 @@ import config from "../config.json" assert { type: "json" };
 const rewriteEvent = ({ message }) => {
   console.log("rewrite");
   const { events, checkin } = readFile("data/check.json");
-  const { linkHref } = events[message.message_id];
+  const { linkHref } = events[message.message_id] || {};
   writeActualFile("data/check.json", "events", {
     ...events,
     [message.message_id]: undefined,

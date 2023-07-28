@@ -64,11 +64,12 @@ const newCommand = async (message) => {
         price,
         text,
         linkHref,
-        date: textDate || date,
+        date,
         timeEvent,
         location,
         dateStart,
         dateEnd,
+        textDate,
       });
 
     const { events: savedEvents } = readFile("data/check.json");
