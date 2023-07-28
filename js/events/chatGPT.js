@@ -16,6 +16,7 @@ const sendCheckEvent = async (img, name, text, href) => {
   const { message_id } = await sendMarkup(
     `<b>${name}</b>\n\n${text}`,
     [
+      [{ text: "Посмотреть", url: href }],
       [{ text: "Переработать", callback_data: "rewrite" }],
       [{ text: "Опубликовать", callback_data: "publish" }],
     ],
