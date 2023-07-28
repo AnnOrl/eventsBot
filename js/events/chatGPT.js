@@ -82,10 +82,10 @@ const chatGPTRequest = async ({
                 ? `\n💰 ${price || textPrice}`
                 : ""
             }${
-              date !== "" || !!textDate || !!filterDate
+              !!textDate || date !== "" || !!filterDate
                 ? `\n🗓️ ${
-                    date ||
                     textDate ||
+                    date ||
                     moment(new Date(filterDate)).format("D MMMM, dddd")
                   }`
                 : ""
