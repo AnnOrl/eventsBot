@@ -26,6 +26,7 @@ const rewriteEvent = ({ message }) => {
 };
 
 const sendEvent = async (img, text, href) => {
+  console.log("posting");
   const { message_id } = await sendPhoto(
     img,
     text,
