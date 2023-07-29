@@ -91,7 +91,7 @@ const chatGPTRequest = async ({
                   }`
                 : ""
             }${timeEvent !== "" ? `\n🕒 ${timeEvent}` : ""}${
-              place !== "" || location !== "" ? `\n📍 ${place || location}` : ""
+              !!location || !!place ? `\n📍 ${location || place}` : ""
             } \n`,
             {
               parentMessageId: res.id,
