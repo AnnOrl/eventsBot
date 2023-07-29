@@ -38,7 +38,7 @@ const sendEvent = async (img, text, href) => {
     } else {
       console.log("reposting");
       return await sendMessage(
-        text + `\n <a href="${href}">Подробности</a`,
+        text + `\n <a href='${href}'>Подробности</a>`,
         config.telegram.channel_chat_id
       );
     }
