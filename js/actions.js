@@ -41,7 +41,7 @@ const sendEvent = async (img, text, href) => {
         encodeURI(img),
         text,
         config.telegram.channel_chat_id,
-        href ? [[{ text: "Перейти по ссылке", url: href }]] : null
+        href ? [[{ text: "Перейти по ссылке", url: encodeURI(href) }]] : null
       );
     }
   });
