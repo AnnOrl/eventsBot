@@ -37,11 +37,9 @@ const sendEvent = async (img, text, href) => {
       return data;
     } else {
       console.log("reposting");
-      return await sendPhoto(
-        encodeURI(img),
-        text,
-        config.telegram.channel_chat_id,
-        href ? [[{ text: "Перейти по ссылке", url: encodeURI(href) }]] : null
+      return await sendMessage(
+        text + `\n <a href="${href}">Подробности</a`,
+        config.telegram.channel_chat_id
       );
     }
   });
