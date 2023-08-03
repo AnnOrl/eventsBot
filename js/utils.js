@@ -382,7 +382,62 @@ function extractDateAndTimeTravel(inputString) {
   return result;
 }
 
+const getSameName = (name, savedEvents) => {
+  let sameName = null;
+
+  for (let k = 0; k < Object.keys(savedEvents).length; k++) {
+    const name1 = name.replaceAll(" ", "").toLowerCase();
+    const name2 = savedEvents[Object.keys(savedEvents)[k]]?.name
+      .replaceAll(" ", "")
+      .toLowerCase();
+
+    if (name1 === name2 || similarity(name1, name2) > 0.4) {
+      sameName = Object.keys(savedEvents)[k].message_id;
+      break;
+    }
+  }
+
+  return sameName;
+};
+
+function levenshteinDistance(a, b) {
+  const m = a.length;
+  const n = b.length;
+
+  if (m === 0) return n;
+  if (n === 0) return m;
+
+  const dp = Array.from(Array(m + 1), () => Array(n + 1).fill(0));
+
+  for (let i = 0; i <= m; i++) {
+    dp[i][0] = i;
+  }
+
+  for (let j = 0; j <= n; j++) {
+    dp[0][j] = j;
+  }
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1, // deletion
+        dp[i][j - 1] + 1, // insertion
+        dp[i - 1][j - 1] + cost // substitution
+      );
+    }
+  }
+
+  return dp[m][n];
+}
+
+const similarity = (string1, string2) =>
+  1 -
+  levenshteinDistance(string1, string2) /
+    Math.max(string1.length, string2.length);
+
 export {
+  getSameName,
   writeActualFile,
   readFile,
   writeFile,
@@ -400,4 +455,5 @@ export {
   extractDateAndTimeLifetickets,
   extractDateAndTimeTravel,
   wait,
+  similarity,
 };

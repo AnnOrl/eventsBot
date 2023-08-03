@@ -5,7 +5,11 @@ moment.locale("ru");
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 
-import { extractDateAndTimeLifetickets, readFile } from "../utils.js";
+import {
+  extractDateAndTimeLifetickets,
+  getSameName,
+  readFile,
+} from "../utils.js";
 moment.locale("ru");
 
 import { saveEvents } from "./parseEvents.js";
@@ -34,15 +38,6 @@ const getLifeticketsEvents = async ({ data }, date) => {
           const img = dom.window.document.querySelector(
             "picture[typeof=ImageObject] img"
           ).src;
-
-          let sameName = null;
-
-          for (let k = 0; k < Object.keys(savedEvents).length; k++) {
-            if (name === savedEvents[Object.keys(savedEvents)[k]].name) {
-              sameName === Object.keys(savedEvents)[k];
-              break;
-            }
-          }
 
           const text = dom.window.document.querySelector(
             "article[property=description]"
@@ -78,7 +73,7 @@ const getLifeticketsEvents = async ({ data }, date) => {
               dateEnd,
               textDate,
             },
-            sameName
+            getSameName(name, savedEvents)
           );
         });
       }

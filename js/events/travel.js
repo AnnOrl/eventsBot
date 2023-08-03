@@ -5,7 +5,7 @@ moment.locale("ru");
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 
-import { extractDateAndTimeTravel, readFile } from "../utils.js";
+import { extractDateAndTimeTravel, readFile, getSameName } from "../utils.js";
 moment.locale("ru");
 
 import { saveEvents } from "./parseEvents.js";
@@ -37,15 +37,6 @@ const getTravels = async (data) => {
             .querySelector(".page-title .container h1")
             .innerHTML.replace(/\n/g, "")
             .replace(/  /g, "");
-
-          let sameName = null;
-
-          for (let k = 0; k < Object.keys(savedEvents).length; k++) {
-            if (name === savedEvents[Object.keys(savedEvents)[k]].name) {
-              sameName === Object.keys(savedEvents)[k];
-              break;
-            }
-          }
 
           const img =
             dom.window.document
@@ -91,7 +82,7 @@ const getTravels = async (data) => {
               dateEnd,
               textDate,
             },
-            sameName
+            getSameName(name, savedEvents)
           );
           needEncode = true;
         });

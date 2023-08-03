@@ -8,6 +8,7 @@ const { JSDOM } = jsdom;
 import {
   extractDateAndTimeAfisha,
   extractDateAndTimeITickets,
+  getSameName,
   readFile,
 } from "../utils.js";
 moment.locale("ru");
@@ -32,6 +33,7 @@ const getAfishaEvents = async (events, date) => {
         events[i].id +
         "/" +
         events[i].url;
+
       if (!savedEvents[linkHref] && checkin.indexOf(linkHref) === -1) {
         console.log("Запрашиваю подробности");
         await axios({
@@ -43,18 +45,10 @@ const getAfishaEvents = async (events, date) => {
             ".sc-d5tvfr-6.eOWIPu"
           ).innerHTML;
 
-          let sameName = null;
+          const img =
+            dom.window.document.querySelector(".sc-jo6gyn-0.dxDuSn img")?.src ||
+            dom.window.document.querySelector("meta[name=image]").content;
 
-          for (let k = 0; k < Object.keys(savedEvents).length; k++) {
-            if (name === savedEvents[Object.keys(savedEvents)[k]].name) {
-              sameName === Object.keys(savedEvents)[k];
-              break;
-            }
-          }
-
-          const img = dom.window.document.querySelector(
-            ".sc-jo6gyn-0.dxDuSn img"
-          ).src;
           const text = dom.window.document.querySelector(
             ".sc-gf2pbu-0.bdVcrM"
           ).textContent;
@@ -100,7 +94,7 @@ const getAfishaEvents = async (events, date) => {
               dateStart,
               dateEnd,
             },
-            sameName
+            getSameName(name, savedEvents)
           );
         });
       }

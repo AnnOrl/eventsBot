@@ -18,7 +18,14 @@ const sendCheckEvent = async (img, name, text, href, sameName) => {
     [
       [{ text: "Посмотреть", url: href }],
       ...(sameName
-        ? [[{ text: "Посмотреть аналогичный", url: sameName }]]
+        ? [
+            [
+              {
+                text: "Посмотреть аналогичный",
+                url: "https://t.me/events_chisinau/" + sameName,
+              },
+            ],
+          ]
         : []),
       [{ text: "Переработать", callback_data: "rewrite" }],
       [{ text: "Опубликовать", callback_data: "publish" }],
