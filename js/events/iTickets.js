@@ -39,6 +39,15 @@ const getITicketEvents = async ({ data }, date) => {
           const dom = new JSDOM(data);
           const name =
             dom.window.document.querySelector(".title_event_name").innerHTML;
+
+          let sameName = null;
+
+          for (let k = 0; k < Object.keys(savedEvents).length; k++) {
+            if (name === savedEvents[Object.keys(savedEvents)[k]].name) {
+              sameName === Object.keys(savedEvents)[k];
+              break;
+            }
+          }
           const img =
             dom.window.document.querySelector(".main_img_item img").src;
           const text = dom.window.document.querySelector(
@@ -62,21 +71,24 @@ const getITicketEvents = async ({ data }, date) => {
           const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
             extractDateAndTimeITickets(dateS + " " + timeS);
 
-          await saveEvents({
-            img,
-            name,
-            price: price !== " лей" && price !== "  лей" ? price : "",
-            text,
-            linkHref,
-            date,
-            location,
-            dateStart,
-            dateEnd,
-            hEvent,
-            mEvent,
-            timeEvent,
-            textDate,
-          });
+          await saveEvents(
+            {
+              img,
+              name,
+              price: price !== " лей" && price !== "  лей" ? price : "",
+              text,
+              linkHref,
+              date,
+              location,
+              dateStart,
+              dateEnd,
+              hEvent,
+              mEvent,
+              timeEvent,
+              textDate,
+            },
+            sameName
+          );
         });
       }
     }

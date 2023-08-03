@@ -42,6 +42,16 @@ const getAfishaEvents = async (events, date) => {
           const name = dom.window.document.querySelector(
             ".sc-d5tvfr-6.eOWIPu"
           ).innerHTML;
+
+          let sameName = null;
+
+          for (let k = 0; k < Object.keys(savedEvents).length; k++) {
+            if (name === savedEvents[Object.keys(savedEvents)[k]].name) {
+              sameName === Object.keys(savedEvents)[k];
+              break;
+            }
+          }
+
           const img = dom.window.document.querySelector(
             ".sc-jo6gyn-0.dxDuSn img"
           ).src;
@@ -74,21 +84,24 @@ const getAfishaEvents = async (events, date) => {
           const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
             extractDateAndTimeAfisha(dateHtml || moment(date).format("D MMMM"));
 
-          await saveEvents({
-            img,
-            name,
-            price,
-            text,
-            linkHref,
-            date,
-            textDate,
-            timeEvent,
-            location,
-            hEvent,
-            mEvent,
-            dateStart,
-            dateEnd,
-          });
+          await saveEvents(
+            {
+              img,
+              name,
+              price,
+              text,
+              linkHref,
+              date,
+              textDate,
+              timeEvent,
+              location,
+              hEvent,
+              mEvent,
+              dateStart,
+              dateEnd,
+            },
+            sameName
+          );
         });
       }
     }

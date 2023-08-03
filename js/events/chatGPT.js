@@ -12,13 +12,17 @@ const api = new ChatGPTUnofficialProxyAPI({
   apiReverseProxyUrl: "https://ai.fakeopen.com/api/conversation",
 });
 
-const sendCheckEvent = async (img, name, text, href) => {
+const sendCheckEvent = async (img, name, text, href, sameName) => {
   const { message_id } = await sendMarkup(
     `<b>${name}</b>\n\n${text}`,
     [
       [{ text: "Посмотреть", url: href }],
+      ...(sameName
+        ? [[{ text: "Посмотреть аналогичный", url: sameName }]]
+        : []),
       [{ text: "Переработать", callback_data: "rewrite" }],
       [{ text: "Опубликовать", callback_data: "publish" }],
+      [{ text: "Удалить", callback_data: "delete" }],
     ],
     config.telegram.my_chat_id
   );
@@ -26,19 +30,22 @@ const sendCheckEvent = async (img, name, text, href) => {
   return { message_id, text: `<b>${name}</b>\n\n${text}` };
 };
 
-const chatGPTRequest = async ({
-  img,
-  name,
-  price,
-  text,
-  linkHref,
-  date: filterDate,
-  timeEvent,
-  location,
-  dateStart,
-  dateEnd,
-  textDate,
-}) => {
+const chatGPTRequest = async (
+  {
+    img,
+    name,
+    price,
+    text,
+    linkHref,
+    date: filterDate,
+    timeEvent,
+    location,
+    dateStart,
+    dateEnd,
+    textDate,
+  },
+  sameName
+) => {
   console.log("\nАнализ chatGPT");
 
   try {
@@ -142,23 +149,32 @@ const chatGPTRequest = async ({
     }
     console.log("\nпубликация", res?.text?.length);
 
-    return sendCheckEvent(img, name, res.text.slice(0, 900), linkHref);
+    return sendCheckEvent(
+      img,
+      name,
+      res.text.slice(0, 900),
+      linkHref,
+      sameName
+    );
   } catch (e) {
     console.log("\nОшибка", e);
     await waitOneHour();
-    return chatGPTRequest({
-      img,
-      name,
-      price,
-      text,
-      linkHref,
-      date: filterDate,
-      timeEvent,
-      location,
-      dateStart,
-      dateEnd,
-      textDate,
-    });
+    return chatGPTRequest(
+      {
+        img,
+        name,
+        price,
+        text,
+        linkHref,
+        date: filterDate,
+        timeEvent,
+        location,
+        dateStart,
+        dateEnd,
+        textDate,
+      },
+      sameName
+    );
   }
 };
 

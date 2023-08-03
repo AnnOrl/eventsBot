@@ -38,6 +38,15 @@ const getTravels = async (data) => {
             .innerHTML.replace(/\n/g, "")
             .replace(/  /g, "");
 
+          let sameName = null;
+
+          for (let k = 0; k < Object.keys(savedEvents).length; k++) {
+            if (name === savedEvents[Object.keys(savedEvents)[k]].name) {
+              sameName === Object.keys(savedEvents)[k];
+              break;
+            }
+          }
+
           const img =
             dom.window.document
               .querySelector(".event__carousel .carousel-item.active img")
@@ -66,21 +75,24 @@ const getTravels = async (data) => {
           const mEvent = (match && match[2]) || "";
           const timeEvent = hEvent && mEvent ? hEvent + ":" + mEvent : "";
 
-          await saveEvents({
-            img,
-            name,
-            price: "",
-            text: text.textContent,
-            linkHref,
-            date,
-            timeEvent,
-            location,
-            hEvent,
-            mEvent,
-            dateStart,
-            dateEnd,
-            textDate,
-          });
+          await saveEvents(
+            {
+              img,
+              name,
+              price: "",
+              text: text.textContent,
+              linkHref,
+              date,
+              timeEvent,
+              location,
+              hEvent,
+              mEvent,
+              dateStart,
+              dateEnd,
+              textDate,
+            },
+            sameName
+          );
           needEncode = true;
         });
       }

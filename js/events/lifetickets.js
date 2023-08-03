@@ -34,6 +34,16 @@ const getLifeticketsEvents = async ({ data }, date) => {
           const img = dom.window.document.querySelector(
             "picture[typeof=ImageObject] img"
           ).src;
+
+          let sameName = null;
+
+          for (let k = 0; k < Object.keys(savedEvents).length; k++) {
+            if (name === savedEvents[Object.keys(savedEvents)[k]].name) {
+              sameName === Object.keys(savedEvents)[k];
+              break;
+            }
+          }
+
           const text = dom.window.document.querySelector(
             "article[property=description]"
           ).textContent;
@@ -52,21 +62,24 @@ const getLifeticketsEvents = async ({ data }, date) => {
             .querySelector("div[typeof=Place] div[property=name]")
             .textContent.replace(/\n/g, "");
 
-          await saveEvents({
-            img,
-            name,
-            price: price ? price : "",
-            text,
-            linkHref,
-            date,
-            timeEvent,
-            location,
-            hEvent,
-            mEvent,
-            dateStart,
-            dateEnd,
-            textDate,
-          });
+          await saveEvents(
+            {
+              img,
+              name,
+              price: price ? price : "",
+              text,
+              linkHref,
+              date,
+              timeEvent,
+              location,
+              hEvent,
+              mEvent,
+              dateStart,
+              dateEnd,
+              textDate,
+            },
+            sameName
+          );
         });
       }
     }

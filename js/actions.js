@@ -24,6 +24,11 @@ const rewriteEvent = ({ message }) => {
 
   deleteMessage(message.chat.id, message.message_id);
 };
+const deleteEvent = ({ message }) => {
+  console.log("delete");
+
+  deleteMessage(message.chat.id, message.message_id);
+};
 
 const sendEvent = async (img, text, href) => {
   const { message_id } = await sendPhoto(
@@ -94,6 +99,7 @@ const publishAnnouncement = async ({ message }) => {
 const actions = {
   rewrite: rewriteEvent,
   publish: publishEvent,
+  delete: deleteEvent,
   publishAnnouncement: publishAnnouncement,
 };
 
