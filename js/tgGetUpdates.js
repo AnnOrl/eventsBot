@@ -27,7 +27,7 @@ const getUpdates = () => {
   })
     .then(({ data }) => {
       const { result } = data;
-      twirlTimer();
+      // twirlTimer();
       if (result.length > 0) {
         console.log("newUpdates", result);
         for (let i = 0; i < result.length; i++) {

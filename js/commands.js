@@ -74,12 +74,13 @@ const newCommand = async (message) => {
 
     const { events: savedEvents } = readFile("data/check.json");
     let newEvents = { ...savedEvents };
+    const [h, m] = timeEvent ? timeEvent.split(':') : [0, 0];
 
     newEvents[check_message_id] = {
       img,
       name,
       price,
-      date: moment(new Date(date)).hours(0).minutes(0).seconds("00").valueOf(),
+      date: moment(new Date(date)).hours(h).minutes(m).seconds("00").valueOf(),
       check_message_id,
       location,
       linkHref,
