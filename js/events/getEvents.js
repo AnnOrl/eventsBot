@@ -78,11 +78,9 @@ const getEvents = async () => {
           'query Events($project_id: String!, $date_from: Int, $date_to: Int, $visible: Boolean, $blocked: Boolean, $expired: Boolean, $stopped: Boolean, $sort: String, $take: Int, $skip: Int, $lang: String, $parent_url: String, $date: String, $keyword: String) {\n  events(project_id: $project_id, date_from: $date_from, date_to: $date_to, visible: $visible, blocked: $blocked, expired: $expired, stopped: $stopped, sort: $sort, take: $take, skip: $skip, parent_url: $parent_url, date: $date, keyword: $keyword) {\n    dates {\n      soon\n      schedule {\n        dates(format: "2 $$January$$, 15:04", lang: $lang)\n        datesTS: dates\n        __typename\n      }\n      __typename\n    }\n    id\n    type\n    url\n    kinopoisk\n    title {\n      ru\n      ro\n      __typename\n    }\n    cover\n    banner {\n      image\n      __typename\n    }\n    ratio {\n      kinopoisk\n      imdb\n      __typename\n    }\n    ticketEvents: ticket_events {\n      ticketDates: ticket_dates {\n        price\n        __typename\n      }\n      __typename\n    }\n    parent {\n      id\n      title {\n        ru\n        ro\n        __typename\n      }\n      url\n      type\n      __typename\n    }\n    place {\n      id\n      title {\n        ru\n        ro\n        __typename\n      }\n      url\n      parent {\n        id\n        type\n        url\n        __typename\n      }\n      __typename\n    }\n    tags\n    __typename\n  }\n}\n',
       },
     })
-      .then(({ data }) => {
-        if (data?.data?.events) {
-          return getAfishaEvents(data?.data?.events, date);
-        }
-      })
+      .then(({ data }) =>
+        data?.data?.events ? getAfishaEvents(data?.data?.events, date) : null
+      )
       .catch((e) => {
         console.log("Ошибка получения обновлений", e);
       });

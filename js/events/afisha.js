@@ -74,7 +74,7 @@ const getAfishaEvents = async (events, date) => {
           const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
             extractDateAndTimeAfisha(dateHtml || moment(date).format("D MMMM"));
 
-          saveEvents({
+          await saveEvents({
             img,
             name,
             price,
