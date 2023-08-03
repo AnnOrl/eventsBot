@@ -61,13 +61,12 @@ const getEvents = async () => {
       data: {
         operationName: "Events",
         variables: {
-          skip: 0,
           take: 18,
           visible: true,
           blocked: false,
           project_id: "75638b23-4652-46d4-a2d4-f097f278fd84",
           lang: "ru",
-          parent_url: "concerts",
+          parent_url: "",
           sort: "dates.schedule:asc",
           date_to: Number(
             (moment(date).add(1439, "minutes").valueOf() + "").slice(0, -3)
