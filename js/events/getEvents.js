@@ -55,17 +55,37 @@ const getEvents = async () => {
         console.log("Ошибка получения обновлений", e);
       });
 
-    // await axios({
-    //   method: "get",
-    //   url: encodeURI(`https://afisha.md/ru/?date=` + date.valueOf()),
-    // })
-    //   .then((data) => {
-    //     console.log(encodeURI(`https://afisha.md/ru/?date=` + date.valueOf()));
-    //     return getAfishaEvents(data, date);
-    //   })
-    //   .catch((e) => {
-    //     console.log("Ошибка получения обновлений", e);
-    //   });
+    await axios({
+      method: "post",
+      url: encodeURI(`https://afisha.md/content_graphql`),
+      data: {
+        operationName: "Events",
+        variables: {
+          skip: 0,
+          take: 18,
+          visible: true,
+          blocked: false,
+          project_id: "75638b23-4652-46d4-a2d4-f097f278fd84",
+          lang: "ru",
+          parent_url: "concerts",
+          sort: "dates.schedule:asc",
+          date_to: Number(
+            (moment(date).add(1439, "minutes").valueOf() + "").slice(0, -3)
+          ),
+          date_from: Number((date.valueOf() + "").slice(0, -3)),
+        },
+        query:
+          'query Events($project_id: String!, $date_from: Int, $date_to: Int, $visible: Boolean, $blocked: Boolean, $expired: Boolean, $stopped: Boolean, $sort: String, $take: Int, $skip: Int, $lang: String, $parent_url: String, $date: String, $keyword: String) {\n  events(project_id: $project_id, date_from: $date_from, date_to: $date_to, visible: $visible, blocked: $blocked, expired: $expired, stopped: $stopped, sort: $sort, take: $take, skip: $skip, parent_url: $parent_url, date: $date, keyword: $keyword) {\n    dates {\n      soon\n      schedule {\n        dates(format: "2 $$January$$, 15:04", lang: $lang)\n        datesTS: dates\n        __typename\n      }\n      __typename\n    }\n    id\n    type\n    url\n    kinopoisk\n    title {\n      ru\n      ro\n      __typename\n    }\n    cover\n    banner {\n      image\n      __typename\n    }\n    ratio {\n      kinopoisk\n      imdb\n      __typename\n    }\n    ticketEvents: ticket_events {\n      ticketDates: ticket_dates {\n        price\n        __typename\n      }\n      __typename\n    }\n    parent {\n      id\n      title {\n        ru\n        ro\n        __typename\n      }\n      url\n      type\n      __typename\n    }\n    place {\n      id\n      title {\n        ru\n        ro\n        __typename\n      }\n      url\n      parent {\n        id\n        type\n        url\n        __typename\n      }\n      __typename\n    }\n    tags\n    __typename\n  }\n}\n',
+      },
+    })
+      .then(({ data }) => {
+        if (data?.data?.events) {
+          return getAfishaEvents(data?.data?.events, date);
+        }
+      })
+      .catch((e) => {
+        console.log("Ошибка получения обновлений", e);
+      });
 
     await axios({
       method: "get",

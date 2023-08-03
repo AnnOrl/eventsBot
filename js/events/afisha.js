@@ -5,27 +5,33 @@ moment.locale("ru");
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 
-import { extractDateAndTimeAfisha, readFile } from "../utils.js";
+import {
+  extractDateAndTimeAfisha,
+  extractDateAndTimeITickets,
+  readFile,
+} from "../utils.js";
 moment.locale("ru");
 
 import { saveEvents } from "./parseEvents.js";
 
-const getAfishaEvents = async ({ data }, date) => {
-  console.log(data);
-  const dom = new JSDOM(data);
-  const links = dom.window.document.querySelectorAll(".events-card a");
-
+const getAfishaEvents = async (events, date) => {
   try {
     console.log(
       "\nАнализ AfishaMD, " + moment(date).format("DD MMMM"),
-      links.length
+      events.length
     );
 
-    for (let i = 0; i < links.length; i++) {
+    for (let i = 0; i < events.length; i++) {
       const { events: savedEvents } = readFile("data/events.json");
       const { checkin = [] } = readFile("data/check.json");
 
-      const linkHref = links[i].href;
+      const linkHref =
+        "https://afisha.md/ru/events/" +
+        events[i].parent[0].url +
+        "/" +
+        events[i].id +
+        "/" +
+        events[i].url;
       if (!savedEvents[linkHref] && checkin.indexOf(linkHref) === -1) {
         console.log("Запрашиваю подробности");
         await axios({
@@ -33,18 +39,40 @@ const getAfishaEvents = async ({ data }, date) => {
           url: encodeURI(linkHref),
         }).then(async ({ data }) => {
           const dom = new JSDOM(data);
-          const name = dom.window.document.querySelector(".eOWIPu").innerHTML;
-          const img = dom.window.document.querySelector(".dxDuSn img").src;
-          const text = dom.window.document.querySelector(".bdVcrM").textContent;
+          const name = dom.window.document.querySelector(
+            ".sc-d5tvfr-6.eOWIPu"
+          ).innerHTML;
+          const img = dom.window.document.querySelector(
+            ".sc-jo6gyn-0.dxDuSn img"
+          ).src;
+          const text = dom.window.document.querySelector(
+            ".sc-gf2pbu-0.bdVcrM"
+          ).textContent;
 
           const allData = dom.window.document.querySelectorAll(
             ".sc-rj43u4-6.cRekYi.text"
           );
-          const location = allData[0].textContent.replace(/\n/g, "");
-          const price = allData[4].textContent.replace(/\n/g, "");
+          const allIcon = dom.window.document.querySelectorAll(
+            ".sc-rj43u4-6.cRekYi i"
+          );
+          let location, price, dateHtml;
+
+          for (let j = 0; j < allIcon.length; j++) {
+            switch (allIcon[j].classList[1]) {
+              case "icon-buildings":
+                location = allData[j].textContent.replace(/\n/g, "");
+                break;
+              case "icon-clock":
+                dateHtml = allData[j].textContent;
+                break;
+              case "icon-ticket2":
+                price = allData[j].textContent.replace(/\n/g, "");
+                break;
+            }
+          }
 
           const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
-            extractDateAndTimeITickets(allData[2].textContent);
+            extractDateAndTimeAfisha(dateHtml || moment(date).format("D MMMM"));
 
           saveEvents({
             img,
