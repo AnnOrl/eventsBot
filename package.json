@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node ./bin/www",
-    "start:nogpt": "MODE=no-gpt node ./bin/www "
+    "start:nogpt": "MODE=no-gpt node ./bin/www",
+    "start:local": "MODE=local node ./bin/www"
   },
   "dependencies": {
     "axios": "^0.25.0",

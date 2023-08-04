@@ -3,7 +3,11 @@ import axios from "axios";
 import config from "../config.json" assert { type: "json" };
 
 const sendMessage = (text, chat_id, props = {}) => {
-  // return console.log('sendMessage', text);
+  if (process.env.MODE === "local") {
+    console.log("sendMessage", text.slice(0, 50) + "...");
+    return { message_id: 0 };
+  }
+
   return axios({
     method: "post",
     url: encodeURI(`${config.apiTG}${config.telegram.token}/sendMessage`),
@@ -25,7 +29,10 @@ const sendMessage = (text, chat_id, props = {}) => {
 };
 
 const sendPhoto = (photo, caption, chat_id, inline_keyboard, props = {}) => {
-  // return console.log('sendPhoto', text);
+  if (process.env.MODE === "local") {
+    console.log("sendPhoto", text.slice(0, 50) + "...");
+    return { message_id: 0 };
+  }
   return axios({
     method: "post",
     url: encodeURI(`${config.apiTG}${config.telegram.token}/sendPhoto`),
@@ -59,7 +66,11 @@ const editMessageText = (
   inline_keyboard,
   props = {}
 ) => {
-  // return console.log('sendMessage', text);
+  if (process.env.MODE === "local") {
+    console.log("editMessage", text.slice(0, 50) + "...");
+    return { message_id: 0 };
+  }
+
   return axios({
     method: "post",
     url: encodeURI(`${config.apiTG}${config.telegram.token}/editMessageText`),
@@ -83,7 +94,11 @@ const editMessageText = (
 };
 
 const deleteMessage = (chat_id, message_id) => {
-  // return console.log('sendMessage', text);
+  if (process.env.MODE === "local") {
+    console.log("deleteMessage", message_id);
+    return { message_id: 0 };
+  }
+
   return axios({
     method: "post",
     url: encodeURI(`${config.apiTG}${config.telegram.token}/deleteMessage`),
@@ -107,6 +122,11 @@ const sendMarkup = (
   inline_keyboard,
   chat_id = config.telegram.chat_id
 ) => {
+  if (process.env.MODE === "local") {
+    console.log("sendMarkup", text.slice(0, 50) + "...");
+    return { message_id: 0 };
+  }
+
   return axios({
     method: "post",
     url: encodeURI(`${config.apiTG}${config.telegram.token}/sendMessage`),

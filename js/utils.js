@@ -392,7 +392,7 @@ const getSameName = (name, savedEvents) => {
       .toLowerCase();
 
     if (name1 === name2 || similarity(name1, name2) > 0.4) {
-      sameName = Object.keys(savedEvents)[k].message_id;
+      sameName = savedEvents[Object.keys(savedEvents)[k]].message_id;
       break;
     }
   }

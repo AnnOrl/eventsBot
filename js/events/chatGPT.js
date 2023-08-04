@@ -57,7 +57,7 @@ const chatGPTRequest = async (
 
   try {
     let res = { text };
-    if (process.env.MODE !== "no-gpt") {
+    if (process.env.MODE !== "no-gpt" && process.env.MODE !== "local") {
       res = await api
         .sendMessage(`Переведи текст на русский язык.\n` + (text || name))
         .then((res) => {
