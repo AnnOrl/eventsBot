@@ -104,6 +104,9 @@ const getAfishaEvents = async (events, date) => {
       }
     }
   } catch (e) {
+    if (e.message === "401") {
+      throw e;
+    }
     console.log("ERROR", e);
   }
 };

@@ -79,6 +79,9 @@ const getLifeticketsEvents = async ({ data }, date) => {
       }
     }
   } catch (e) {
+    if (e.message === "401") {
+      throw e;
+    }
     console.log("ERROR", e);
   }
 };

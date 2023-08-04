@@ -34,6 +34,9 @@ const getEvents = async () => {
       return getTravels(data);
     })
     .catch((e) => {
+      if (e.message === "401") {
+        throw e;
+      }
       console.log("Ошибка получения обновлений", e);
     });
 
@@ -53,6 +56,9 @@ const getEvents = async () => {
     })
       .then((data) => getITicketEvents(data, date))
       .catch((e) => {
+        if (e.message === "401") {
+          throw e;
+        }
         console.log("Ошибка получения обновлений", e);
       });
 
@@ -82,6 +88,9 @@ const getEvents = async () => {
         data?.data?.events ? getAfishaEvents(data?.data?.events, date) : null
       )
       .catch((e) => {
+        if (e.message === "401") {
+          throw e;
+        }
         console.log("Ошибка получения обновлений", e);
       });
 
@@ -115,6 +124,9 @@ const getEvents = async () => {
     })
       .then(({ data }) => getLifeticketsEvents(data?.data?.timetables, date))
       .catch((e) => {
+        if (e.message === "401") {
+          throw e;
+        }
         console.log("Ошибка получения обновлений", e);
       });
   }

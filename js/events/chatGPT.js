@@ -3,7 +3,7 @@ moment.locale("ru");
 
 import config from "../../config.json" assert { type: "json" };
 import { waitOneHour } from "../utils.js";
-import { sendMarkup, sendPhoto } from "../tgApi.js";
+import { sendMarkup, sendMessage, sendPhoto } from "../tgApi.js";
 
 import { ChatGPTUnofficialProxyAPI } from "chatgpt";
 
@@ -164,7 +164,14 @@ const chatGPTRequest = async (
       sameName
     );
   } catch (e) {
-    console.log("\nОшибка", e);
+    if (e.statusCode === 401) {
+      await sendMessage(
+        "Истек код авторизации ChatGPT",
+        config.telegram.my_chat_id
+      );
+      throw new Error(e.statusCode);
+    }
+
     await waitOneHour();
     return chatGPTRequest(
       {
