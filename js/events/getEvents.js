@@ -136,17 +136,20 @@ const clearOldEvents = () => {
 };
 const clearOldCheckEvents = () => {
   const { events } = readFile("data/check.json");
-  const actualEvents = {};
+  let actualEvents = {};
+  let actualCheckin = [];
 
   Object.keys(events).forEach((key) => {
     const today = moment();
 
     if (!moment(events[key].date).isBefore(today, "day")) {
       actualEvents[key] = events[key];
+      actualCheckin = [...actualCheckin, events[key].linkHref];
     }
   });
 
   writeActualFile("data/check.json", "events", actualEvents);
+  writeActualFile("data/check.json", "checkin", actualCheckin);
 };
 
 const getTodayEvents = () => {

@@ -76,7 +76,11 @@ const getAfishaEvents = async (events, date) => {
           }
 
           const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
-            extractDateAndTimeAfisha(dateHtml || moment(date).format("D MMMM"));
+            extractDateAndTimeAfisha(
+              dateHtml && dateHtml !== " - "
+                ? dateHtml
+                : moment(date).format("D MMMM")
+            );
 
           await saveEvents(
             {
