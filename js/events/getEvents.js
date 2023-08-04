@@ -22,6 +22,7 @@ const periodDays = 180;
 
 const getEvents = async () => {
   clearOldEvents();
+  clearOldCheckEvents();
 
   await axios({
     method: "get",
@@ -132,6 +133,20 @@ const clearOldEvents = () => {
   });
 
   writeActualFile("data/events.json", "events", actualEvents);
+};
+const clearOldCheckEvents = () => {
+  const { events } = readFile("data/check.json");
+  const actualEvents = {};
+
+  Object.keys(events).forEach((key) => {
+    const today = moment();
+
+    if (!moment(events[key].date).isBefore(today, "day")) {
+      actualEvents[key] = events[key];
+    }
+  });
+
+  writeActualFile("data/check.json", "events", actualEvents);
 };
 
 const getTodayEvents = () => {
