@@ -115,6 +115,20 @@ const newCommand = async (message) => {
     );
   }
 };
+
+const reloadCommand = async (message) => {
+  if (message.from.id !== +config.telegram.my_chat_id) {
+    return;
+  }
+  writeActualFile("data/check.json", "events", {});
+
+  writeActualFile(
+    "data/check.json",
+    "checkin",
+    []
+  );
+};
+
 const todayCommand = async (message) => {
   findEvents(message, filterEvents(isTodayEvent), "сегодня");
 };
@@ -136,6 +150,7 @@ const commands = {
   "/thisweek": thisweekCommand,
   "/nextweek": nextweekCommand,
   "/newpost": newCommand,
+  "/reload": reloadCommand,
 };
 
 export { commands };
