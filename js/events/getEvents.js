@@ -17,6 +17,7 @@ import { getITicketEvents } from "./iTickets.js";
 import { getAfishaEvents } from "./afisha.js";
 import { getLifeticketsEvents } from "./lifetickets.js";
 import { getTravels } from "./travel.js";
+import { getFilms } from "./films.js";
 
 const periodDays = 180;
 
@@ -46,7 +47,6 @@ const getEvents = async () => {
     const date = moment(today).add(i, "days").hours(0).minutes(0).seconds(0);
     const formatDateIT = date.format("DD.MM.YYYY");
     const formatDateLT = date.format("YYYY-MM-DD");
-    const formatDateMD = date.format("DD/MM/YYYY");
 
     await axios({
       method: "get",
@@ -137,7 +137,7 @@ const clearOldEvents = () => {
   const actualEvents = {};
 
   Object.keys(events).forEach((key) => {
-    const today = moment();
+    const today = moment().hours(0).minutes(0).seconds(0);
 
     if (!moment(events[key].date).isBefore(today, "day")) {
       actualEvents[key] = events[key];
@@ -152,7 +152,7 @@ const clearOldCheckEvents = () => {
   let actualCheckin = [];
 
   Object.keys(events).forEach((key) => {
-    const today = moment();
+    const today = moment().hours(0).minutes(0).seconds(0);
 
     if (!moment(events[key].date).isBefore(today, "day")) {
       actualEvents[key] = events[key];
@@ -183,18 +183,21 @@ const getTodayEvents = () => {
     );
 
     if (isFound) {
-      sendMarkup(
-        text,
-        [
-          [
-            {
-              text: "Опубликовать анонс",
-              callback_data: "publishAnnouncement",
-            },
-          ],
-        ],
-        config.telegram.my_chat_id
-      );
+      sendMessage(text, config.telegram.my_chat_id, {
+        disable_web_page_preview: true,
+      });
+      // sendMessage(
+      //   text,
+      //   [
+      //     [
+      //       {
+      //         text: "Опубликовать анонс",
+      //         callback_data: "publishAnnouncement",
+      //       },
+      //     ],
+      //   ],
+      //   config.telegram.my_chat_id
+      // );
     }
 
     writeActualFile(
@@ -214,21 +217,21 @@ const getTodayEvents = () => {
     );
 
     if (isFound) {
-      sendMarkup(
-        text,
-        [
-          [
-            {
-              text: "Опубликовать анонс",
-              callback_data: "publishAnnouncement",
-            },
-          ],
-        ],
-        config.telegram.my_chat_id
-      );
-      // sendMessage(text, config.telegram.my_chat_id, {
-      //   disable_web_page_preview: true,
-      // });
+      // sendMarkup(
+      //   text,
+      //   [
+      //     [
+      //       {
+      //         text: "Опубликовать анонс",
+      //         callback_data: "publishAnnouncement",
+      //       },
+      //     ],
+      //   ],
+      //   config.telegram.my_chat_id
+      // );
+      sendMessage(text, config.telegram.my_chat_id, {
+        disable_web_page_preview: true,
+      });
     }
 
     writeActualFile(
@@ -250,21 +253,21 @@ const getTodayEvents = () => {
     );
 
     if (isFound) {
-      sendMarkup(
-        text,
-        [
-          [
-            {
-              text: "Опубликовать анонс",
-              callback_data: "publishAnnouncement",
-            },
-          ],
-        ],
-        config.telegram.my_chat_id
-      );
-      // sendMessage(text, config.telegram.my_chat_id, {
-      //   disable_web_page_preview: true,
-      // });
+      // sendMarkup(
+      //   text,
+      //   [
+      //     [
+      //       {
+      //         text: "Опубликовать анонс",
+      //         callback_data: "publishAnnouncement",
+      //       },
+      //     ],
+      //   ],
+      //   config.telegram.my_chat_id
+      // );
+      sendMessage(text, config.telegram.my_chat_id, {
+        disable_web_page_preview: true,
+      });
     }
     writeActualFile(
       "data/events.json",
@@ -274,4 +277,38 @@ const getTodayEvents = () => {
   }
 };
 
-export { getEvents, getTodayEvents };
+const getTodayFilms = async () => {
+  const today = moment();
+  const {
+    everyDaysFilmDate = "",
+  } = readFile("data/events.json");
+  if (
+    (!everyDaysFilmDate ||
+      !moment(everyDaysFilmDate).isSame(today, "day")) &&
+    today.hour() >= 8
+  ) {
+    await axios({
+      method: "get",
+      url: encodeURI(
+        `https://cineplex.md/films?display=now&` + today.format('YYYY-MM-DD')
+      ),
+    })
+      .then(({ data }) => {
+        getFilms(data);
+      })
+      .catch((e) => {
+        if (e.message === "401") {
+          throw e;
+        }
+        console.log("Ошибка получения фильмов", e);
+      });
+  }
+
+  writeActualFile(
+    "data/events.json",
+    "everyDaysFilmDate",
+    today.valueOf()
+  );
+
+}
+export { getEvents, getTodayEvents, getTodayFilms };

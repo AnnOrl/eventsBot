@@ -127,6 +127,13 @@ const reloadCommand = async (message) => {
     "checkin",
     []
   );
+  sendMessage(
+    `История очищена`,
+    message.from.id,
+    {
+      disable_web_page_preview: true,
+    }
+  );
 };
 
 const todayCommand = async (message) => {

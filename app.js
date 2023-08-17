@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 
 import { getUpdates } from "./js/tgGetUpdates.js";
-import { getEvents, getTodayEvents } from "./js/events/getEvents.js";
+import { getEvents, getTodayEvents, getTodayFilms } from "./js/events/getEvents.js";
 
 var app = express();
 
@@ -30,10 +30,14 @@ app.use(express.static(path.join(__dirname, "public")));
 getUpdates();
 setInterval(getUpdates, 6000);
 
-getEvents();
 getTodayEvents();
+getTodayFilms();
+
+getEvents();
+
 setInterval(getEvents, 21600000); //6h
 setInterval(getTodayEvents, 3600000); //1h
+setInterval(getTodayFilms, 21600000); //6h
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

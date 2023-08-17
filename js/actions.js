@@ -1,4 +1,5 @@
 import {
+  copyMessage,
   deleteMessage,
   editMessageText,
   sendMessage,
@@ -85,6 +86,13 @@ const publishEvent = async ({ message }) => {
 
   deleteMessage(message.chat.id, message.message_id);
 };
+const publishFilmsNow = async ({ message }) => {
+  console.log("publishFilmsNow");
+
+  copyMessage(config.telegram.channel_chat_id, message.message_id, message.chat.id)
+
+  deleteMessage(message.chat.id, message.message_id);
+};
 
 const publishAnnouncement = async ({ message }) => {
   console.log("publishAnnouncement");
@@ -101,6 +109,7 @@ const actions = {
   publish: publishEvent,
   delete: deleteEvent,
   publishAnnouncement: publishAnnouncement,
+  publishFilmsNow
 };
 
 export { actions };

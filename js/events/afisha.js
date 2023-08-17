@@ -49,6 +49,14 @@ const getAfishaEvents = async (events, date) => {
             dom.window.document.querySelector(".sc-jo6gyn-0.dxDuSn img")?.src ||
             dom.window.document.querySelector("meta[name=image]").content;
 
+          const category = dom.window.document.querySelector(
+            ".sc-d5tvfr-3.hEZhBl"
+          ).textContent;
+
+          if(category === 'Кино') {
+            return;
+          }
+
           const text = dom.window.document.querySelector(
             ".sc-gf2pbu-0.bdVcrM"
           ).textContent;
@@ -97,6 +105,7 @@ const getAfishaEvents = async (events, date) => {
               mEvent,
               dateStart,
               dateEnd,
+              category
             },
             getSameName(name, savedEvents)
           );

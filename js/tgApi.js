@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import config from "../config.json" assert { type: "json" };
+import { waitOneMinute } from "./utils.js";
 
 const sendMessage = (text, chat_id, props = {}) => {
   if (process.env.MODE === "local") {
@@ -27,6 +28,31 @@ const sendMessage = (text, chat_id, props = {}) => {
       console.log(e);
     });
 };
+const copyMessage = (chat_id, message_id, from_chat_id) => {
+  if (process.env.MODE === "local") {
+    console.log("copyMessage");
+    return { message_id: 0 };
+  }
+
+  return axios({
+    method: "post",
+    url: encodeURI(`${config.apiTG}${config.telegram.token}/copyMessage`),
+    data: {
+      chat_id,
+      message_id,
+      from_chat_id,
+      reply_markup: undefined,
+    },
+  })
+    .then(({ data }) => {
+      console.log("copyMessage");
+
+      return data.result;
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+};
 
 const sendPhoto = (photo, caption, chat_id, inline_keyboard, props = {}) => {
   if (process.env.MODE === "local") {
@@ -43,14 +69,38 @@ const sendPhoto = (photo, caption, chat_id, inline_keyboard, props = {}) => {
       caption,
       reply_markup: inline_keyboard
         ? {
-            inline_keyboard,
-          }
+          inline_keyboard,
+        }
         : undefined,
       ...props,
     },
   })
     .then(({ data }) => {
       console.log("sendPhoto", caption.slice(0, 13) + "...");
+
+      return data.result;
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+};
+
+const sendFD = async (formData, chat_id, inline_keyboard) => {
+  if (process.env.MODE === "local") {
+    console.log("sendPhoto");
+    return { message_id: 0 };
+  }
+
+  formData.append("chat_id", chat_id);
+
+  return axios.post(
+    encodeURI(`${config.apiTG}${config.telegram.token}/sendPhoto`),
+    formData,
+    {
+      headers: formData.getHeaders(),
+    })
+    .then(({ data }) => {
+      console.log("sendPhoto");
 
       return data.result;
     })
@@ -93,6 +143,35 @@ const editMessageText = (
     });
 };
 
+const editMessageReplyMarkup = (
+  chat_id,
+  message_id,
+  inline_keyboard,
+) => {
+  if (process.env.MODE === "local") {
+    console.log("editMessageReplyMarkup");
+    return { message_id: 0 };
+  }
+
+  return axios({
+    method: "post",
+    url: encodeURI(`${config.apiTG}${config.telegram.token}/editMessageReplyMarkup`),
+    data: {
+      message_id,
+      chat_id,
+      ...(inline_keyboard ? { reply_markup: { inline_keyboard } } : {}),
+    },
+  })
+    .then(({ data }) => {
+      console.log("editMessageReplyMarkup");
+
+      return data.result;
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+};
+
 const deleteMessage = (chat_id, message_id) => {
   if (process.env.MODE === "local") {
     console.log("deleteMessage", message_id);
@@ -114,6 +193,7 @@ const deleteMessage = (chat_id, message_id) => {
     })
     .catch((e) => {
       console.log(e);
+      editMessageText('Сообщение удалено', chat_id, message_id)
     });
 };
 
@@ -161,4 +241,6 @@ export {
   editMessageText,
   deleteMessage,
   sendPhoto,
+  sendFD,
+  copyMessage
 };

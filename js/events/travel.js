@@ -66,6 +66,10 @@ const getTravels = async (data) => {
           const mEvent = (match && match[2]) || "";
           const timeEvent = hEvent && mEvent ? hEvent + ":" + mEvent : "";
 
+          if(date && date.isBefore(moment())){
+            return;
+          }
+
           await saveEvents(
             {
               img,

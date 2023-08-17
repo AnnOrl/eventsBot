@@ -19,13 +19,13 @@ const sendCheckEvent = async (img, name, text, href, sameName) => {
       [{ text: "Посмотреть", url: href }],
       ...(sameName
         ? [
-            [
-              {
-                text: "Посмотреть аналогичный",
-                url: "https://t.me/events_chisinau/" + sameName,
-              },
-            ],
-          ]
+          [
+            {
+              text: "Посмотреть аналогичный",
+              url: "https://t.me/events_chisinau/" + sameName,
+            },
+          ],
+        ]
         : []),
       [{ text: "Переработать", callback_data: "rewrite" }],
       [{ text: "Опубликовать", callback_data: "publish" }],
@@ -50,6 +50,7 @@ const chatGPTRequest = async (
     dateStart,
     dateEnd,
     textDate,
+    category
   },
   sameName
 ) => {
@@ -85,27 +86,22 @@ const chatGPTRequest = async (
           const {
             date,
             place,
-            category,
+            category: categoryGPT,
             price: textPrice,
           } = JSON.parse(res?.text || {});
 
           return api.sendMessage(
-            `забудь про json. Добавь в начало поста следующую информацию, переведи при необходимости на русский язык: ${
-              category !== "" ? `\n🏷️ ${category}` : ""
-            }${
-              price !== "" || textPrice != ""
-                ? `\n💰 ${price || textPrice}`
-                : ""
-            }${
-              !!textDate || date !== "" || !!filterDate
-                ? `\n🗓️ ${
-                    textDate ||
-                    date ||
-                    moment(new Date(filterDate)).format("D MMMM, dddd")
-                  }`
-                : ""
-            }${timeEvent !== "" ? `\n🕒 ${timeEvent}` : ""}${
-              !!location || !!place ? `\n📍 ${location || place}` : ""
+            `забудь про json. Добавь в начало поста следующую информацию, переведи при необходимости на русский язык: ${category !== "" || categoryGPT !== "" ? `\n🏷️ ${category || categoryGPT}` : ""
+            }${price !== "" || textPrice != ""
+              ? `\n💰 ${price || textPrice}`
+              : ""
+            }${!!textDate || date !== "" || !!filterDate
+              ? `\n🗓️ ${textDate ||
+              date ||
+              moment(new Date(filterDate)).format("D MMMM, dddd")
+              }`
+              : ""
+            }${timeEvent !== "" ? `\n🕒 ${timeEvent}` : ""}${!!location || !!place ? `\n📍 ${location || place}` : ""
             } \n`,
             {
               parentMessageId: res.id,
@@ -135,10 +131,8 @@ const chatGPTRequest = async (
           if (res.text.length > 800) {
             console.log("\nСнова обрезаем");
             const { text } = await api.sendMessage(
-              `Длина полученного текста ${
-                res.text.length
-              } символов. Максимально уменьши этот текст, убери из основного текста поста минимум ${
-                res.text.length - 800
+              `Длина полученного текста ${res.text.length
+              } символов. Максимально уменьши этот текст, убери из основного текста поста минимум ${res.text.length - 800
               } символов. Не меняй часть, которую я просила добавить в начале поста (с ценой, категорией и так далее). Не используй двойные кавычки. Не пиши никаких своих комментариев, не присылай оправдания, я хочу видеть в ответ только JSON в формате {post: ''}, где post - уменьшенный текст поста. Текст должен быть на русском языке.`,
               {
                 parentMessageId: res.id,
@@ -192,4 +186,46 @@ const chatGPTRequest = async (
   }
 };
 
+const chatGPTTranslate = async (
+  text
+) => {
+  console.log("\Перевод chatGPT");
+
+  try {
+    let res = { text };
+    if (process.env.MODE !== "no-gpt" && process.env.MODE !== "local") {
+      res = await api
+        .sendMessage(`Переведи текст на русский язык. В ответ верни только переведенный текст вместе с форматированием\n` + (text || name))
+    }
+    console.log("\nпубликация", res?.text?.length);
+
+
+  } catch (e) {
+    if (e.statusCode === 401) {
+      await sendMessage(
+        "Истек код авторизации ChatGPT",
+        config.telegram.my_chat_id
+      );
+      throw new Error(e.statusCode);
+    }
+
+    await waitOneHour();
+    return chatGPTRequest(
+      {
+        img,
+        name,
+        price,
+        text,
+        linkHref,
+        date: filterDate,
+        timeEvent,
+        location,
+        dateStart,
+        dateEnd,
+        textDate,
+      },
+      sameName
+    );
+  }
+};
 export { chatGPTRequest };

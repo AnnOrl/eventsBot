@@ -1,6 +1,6 @@
 import fs from "fs";
 import pkg from "lodash";
-
+import { createCanvas, loadImage } from 'canvas';
 const { isEmpty, set, sortBy } = pkg;
 
 import moment from "moment";
@@ -258,13 +258,12 @@ function extractDateAndTimeAfisha(dateString) {
     // Проверяем существование startMonth и endMonth перед использованием toLowerCase()
     const normalizedDateStart = startMonth
       ? `${monthNames[startMonth.toLowerCase()]}-${startDay.padStart(
-          2,
-          "0"
-        )}`.toLowerCase()
+        2,
+        "0"
+      )}`.toLowerCase()
       : "";
     const normalizedDateEnd = endMonth
-      ? `${monthNames[endMonth.toLowerCase()]}-${
-          endDay ? endDay.padStart(2, "0") : ""
+      ? `${monthNames[endMonth.toLowerCase()]}-${endDay ? endDay.padStart(2, "0") : ""
         }`.toLowerCase()
       : "";
 
@@ -307,9 +306,8 @@ function extractDateAndTimeITickets(inputString) {
     const dateStart = `${numericMonth}-${dayStart.padStart(2, "0")}`;
     const dateEnd = `${numericMonth}-${dayEnd.padStart(2, "0")}`;
 
-    const textDate = `${dayStart}${
-      dayStart !== dayEnd ? `-${dayEnd}` : ""
-    } ${getMonthDeclension(numericMonth)}`;
+    const textDate = `${dayStart}${dayStart !== dayEnd ? `-${dayEnd}` : ""
+      } ${getMonthDeclension(numericMonth)}`;
 
     result = {
       dateStart,
@@ -434,7 +432,144 @@ function levenshteinDistance(a, b) {
 const similarity = (string1, string2) =>
   1 -
   levenshteinDistance(string1, string2) /
-    Math.max(string1.length, string2.length);
+  Math.max(string1.length, string2.length);
+
+
+// async function createImageCollage(imageLinks) {
+//   const imagesPerRow = 3;
+//   const canvas = createCanvas();
+//   const context = canvas.getContext('2d');
+
+//   const images = await Promise.all(imageLinks.map(async (link) => {
+//     return await loadImage(link);
+//   }));
+
+//   // Получаем размеры первого изображения для определения пропорций
+//   const firstImage = images[0];
+//   const imageWidth = firstImage.width;
+//   const imageHeight = firstImage.height;
+
+//   const collageWidth = imageWidth * imagesPerRow; // Ширина коллажа
+//   const collageHeight = imageHeight * Math.ceil(images.length / imagesPerRow); // Высота коллажа
+
+//   canvas.width = collageWidth;
+//   canvas.height = collageHeight;
+
+//   let x = 0;
+//   let y = 0;
+
+//   for (const img of images) {
+//     context.drawImage(img, x, y, imageWidth, imageHeight);
+//     x += imageWidth;
+
+//     if (x >= collageWidth) {
+//       x = 0;
+//       y += imageHeight;
+//     }
+//   }
+
+//   return canvas.toBuffer('image/jpeg');
+// }
+
+async function createImageCollage(imageLinks) {
+  const imagesPerRow = 3;
+  const canvas = createCanvas();
+  const context = canvas.getContext('2d');
+
+  const images = await Promise.all(imageLinks.map(async (link) => {
+    return await loadImage(link);
+  }));
+
+  const firstImage = images[0];
+  const imageWidth = firstImage.width;
+  const imageHeight = firstImage.height;
+
+  const numRows = Math.ceil(images.length / imagesPerRow);
+  const collageWidth = imageWidth * Math.min(imagesPerRow, images.length);
+  const collageHeight = imageHeight * numRows;
+
+  canvas.width = collageWidth;
+  canvas.height = collageHeight;
+
+  // Apply a stronger blur to the background image
+  // CHANGE HERE
+  const blurRadius = 30;
+
+  // Create a temporary canvas to hold the blurred image
+  const tempCanvas = createCanvas(collageWidth, collageHeight);
+  const tempContext = tempCanvas.getContext('2d');
+  tempContext.drawImage(firstImage, 0, 0, collageWidth, collageHeight);
+
+  // Apply box blur
+  boxBlur(tempCanvas, blurRadius);
+
+  // Draw the blurred background onto the main canvas
+  context.drawImage(tempCanvas, 0, 0, collageWidth, collageHeight);
+
+  // Draw a black semi-transparent overlay
+  // CHANGE HERE
+  context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+  context.fillRect(0, 0, collageWidth, collageHeight);
+
+  // Draw the images on top of the background
+  let y = (collageHeight - imageHeight * numRows) / 2;
+
+  for (let row = 0; row < numRows; row++) {
+    const imagesInRow = Math.min(imagesPerRow, images.length - row * imagesPerRow);
+    let x = (collageWidth - imageWidth * imagesInRow) / 2;
+
+    for (let i = row * imagesPerRow; i < row * imagesPerRow + imagesInRow; i++) {
+      context.drawImage(images[i], x, y, imageWidth, imageHeight);
+      x += imageWidth;
+    }
+
+    y += imageHeight;
+  }
+
+  return canvas.toBuffer('image/jpeg');
+}
+
+function boxBlur(canvas, radius) {
+  const context = canvas.getContext('2d');
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+  const width = canvas.width;
+  const height = canvas.height;
+
+  const size = radius * 2 + 1;
+  const total = size * size;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let r = 0;
+      let g = 0;
+      let b = 0;
+
+      for (let iy = y - radius; iy <= y + radius; iy++) {
+        for (let ix = x - radius; ix <= x + radius; ix++) {
+          const i = Math.min(width - 1, Math.max(0, ix)) + Math.min(height - 1, Math.max(0, iy)) * width;
+          r += pixels[i * 4];
+          g += pixels[i * 4 + 1];
+          b += pixels[i * 4 + 2];
+        }
+      }
+
+      pixels[(x + y * width) * 4] = r / total;
+      pixels[(x + y * width) * 4 + 1] = g / total;
+      pixels[(x + y * width) * 4 + 2] = b / total;
+    }
+  }
+
+  context.putImageData(imageData, 0, 0);
+}
+
+
+
+
+
+
+
+
 
 export {
   getSameName,
@@ -456,4 +591,5 @@ export {
   extractDateAndTimeTravel,
   wait,
   similarity,
+  createImageCollage
 };

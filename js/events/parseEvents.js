@@ -19,6 +19,7 @@ const saveEvents = async (
     dateStart,
     dateEnd,
     textDate,
+    category
   },
   sameName
 ) => {
@@ -35,6 +36,7 @@ const saveEvents = async (
       dateStart,
       dateEnd,
       textDate,
+      category
     },
     sameName
   );
@@ -55,6 +57,7 @@ const saveEvents = async (
     dateEnd,
     timeEvent,
     textDate: textDate || date,
+    category
   };
 
   writeActualFile("data/check.json", "events", newEvents);
