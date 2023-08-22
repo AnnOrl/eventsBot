@@ -13,8 +13,9 @@ const api = new ChatGPTUnofficialProxyAPI({
 });
 
 const sendCheckEvent = async (img, name, text, href, sameName) => {
+  const fullText = name ? `<b>${name}</b>\n\n${text}` : text;
   const { message_id } = await sendMarkup(
-    `<b>${name}</b>\n\n${text}`,
+    fullText,
     [
       [{ text: "Посмотреть", url: href }],
       ...(sameName
@@ -28,13 +29,14 @@ const sendCheckEvent = async (img, name, text, href, sameName) => {
         ]
         : []),
       [{ text: "Переработать", callback_data: "rewrite" }],
+      [{ text: "Редактировать вручную", callback_data: "edit" }],
       [{ text: "Опубликовать", callback_data: "publish" }],
       [{ text: "Удалить", callback_data: "delete" }],
     ],
     config.telegram.my_chat_id
   );
 
-  return { message_id, text: `<b>${name}</b>\n\n${text}` };
+  return { message_id, text: fullText };
 };
 
 const chatGPTRequest = async (
@@ -228,4 +230,4 @@ const chatGPTTranslate = async (
     );
   }
 };
-export { chatGPTRequest };
+export { chatGPTRequest, sendCheckEvent };

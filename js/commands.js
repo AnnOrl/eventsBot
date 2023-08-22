@@ -13,7 +13,7 @@ import {
 } from "./utils.js";
 import moment from "moment";
 import config from "../config.json" assert { type: "json" };
-import { chatGPTRequest } from "./events/chatGPT.js";
+import { chatGPTRequest, sendCheckEvent } from "./events/chatGPT.js";
 import { getTodayFilmsEvent } from "./events/getEvents.js";
 
 moment.locale("ru");
@@ -49,6 +49,7 @@ const newCommand = async (message) => {
       name = "",
       price = "",
       text = "",
+      postText = "",
       linkHref = "",
       date = "",
       timeEvent = "",
@@ -58,20 +59,36 @@ const newCommand = async (message) => {
       textDate = "",
     } = JSON.parse(body);
 
-    const { message_id: check_message_id, text: postText } =
-      await chatGPTRequest({
+    let check_message_id, resText;
+
+    if (postText) {
+      const { message_id } = await sendCheckEvent(
         img,
-        name,
-        price,
-        text,
-        linkHref,
-        date,
-        timeEvent,
-        location,
-        dateStart,
-        dateEnd,
-        textDate,
-      });
+        '',
+        postText,
+        linkHref
+      );
+
+      check_message_id = message_id;
+      resText = postText
+    } else {
+      const { message_id, text } =
+        await chatGPTRequest({
+          img,
+          name,
+          price,
+          text,
+          linkHref,
+          date,
+          timeEvent,
+          location,
+          dateStart,
+          dateEnd,
+          textDate,
+        });
+      check_message_id = message_id;
+      resText = text;
+    }
 
     const { events: savedEvents } = readFile("data/check.json");
     let newEvents = { ...savedEvents };

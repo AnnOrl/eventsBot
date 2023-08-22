@@ -7,6 +7,7 @@ import {
 } from "./tgApi.js";
 import { readFile, writeActualFile } from "./utils.js";
 import config from "../config.json" assert { type: "json" };
+import moment from "moment";
 
 const rewriteEvent = ({ message }) => {
   console.log("rewrite");
@@ -24,6 +25,31 @@ const rewriteEvent = ({ message }) => {
   );
 
   deleteMessage(message.chat.id, message.message_id);
+};
+const editEvent = ({ message }) => {
+  console.log("edit");
+  const { events, checkin } = readFile("data/check.json");
+  const { linkHref } = events[message.message_id] || {};
+
+  const { check_message_id, date, ...event } = events[message.message_id];
+
+  editMessageText(JSON.stringify({
+    ...event,
+    date: moment(date).format('MM-DD-YYYY')
+  }), message.chat.id, message.message_id, [], {
+    disable_web_page_preview: true,
+  });
+
+  writeActualFile("data/check.json", "events", {
+    ...events,
+    [message.message_id]: undefined,
+  });
+
+  writeActualFile(
+    "data/check.json",
+    "checkin",
+    checkin.filter((href) => href !== linkHref)
+  );
 };
 const deleteEvent = ({ message }) => {
   console.log("delete");
@@ -108,6 +134,7 @@ const actions = {
   rewrite: rewriteEvent,
   publish: publishEvent,
   delete: deleteEvent,
+  edit: editEvent,
   publishAnnouncement: publishAnnouncement,
   publishFilmsNow
 };
