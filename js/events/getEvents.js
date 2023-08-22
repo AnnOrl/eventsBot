@@ -281,7 +281,7 @@ const getTodayFilmsEvent = async () =>
   await axios({
     method: "get",
     url: encodeURI(
-      `https://cineplex.md/films?display=now&` + today.format('YYYY-MM-DD')
+      `https://cineplex.md/films?display=now&` + moment().format('YYYY-MM-DD')
     ),
   })
     .then(({ data }) => {
