@@ -277,6 +277,23 @@ const getTodayEvents = () => {
   }
 };
 
+const getTodayFilmsEvent = async () =>
+  await axios({
+    method: "get",
+    url: encodeURI(
+      `https://cineplex.md/films?display=now&` + today.format('YYYY-MM-DD')
+    ),
+  })
+    .then(({ data }) => {
+      getFilms(data);
+    })
+    .catch((e) => {
+      if (e.message === "401") {
+        throw e;
+      }
+      console.log("Ошибка получения фильмов", e);
+    });
+
 const getTodayFilms = async () => {
   const today = moment();
   const {
@@ -287,21 +304,7 @@ const getTodayFilms = async () => {
       !moment(everyDaysFilmDate).isSame(today, "day")) &&
     today.hour() >= 8
   ) {
-    await axios({
-      method: "get",
-      url: encodeURI(
-        `https://cineplex.md/films?display=now&` + today.format('YYYY-MM-DD')
-      ),
-    })
-      .then(({ data }) => {
-        getFilms(data);
-      })
-      .catch((e) => {
-        if (e.message === "401") {
-          throw e;
-        }
-        console.log("Ошибка получения фильмов", e);
-      });
+    await getTodayFilmsEvent();
   }
 
   writeActualFile(
@@ -311,4 +314,4 @@ const getTodayFilms = async () => {
   );
 
 }
-export { getEvents, getTodayEvents, getTodayFilms };
+export { getEvents, getTodayEvents, getTodayFilms, getTodayFilmsEvent };

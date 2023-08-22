@@ -14,6 +14,7 @@ import {
 import moment from "moment";
 import config from "../config.json" assert { type: "json" };
 import { chatGPTRequest } from "./events/chatGPT.js";
+import { getTodayFilmsEvent } from "./events/getEvents.js";
 
 moment.locale("ru");
 
@@ -156,6 +157,7 @@ const commands = {
   "/tomorrow": tomorrowCommand,
   "/thisweek": thisweekCommand,
   "/nextweek": nextweekCommand,
+  "/films": getTodayFilmsEvent,
   "/newpost": newCommand,
   "/reload": reloadCommand,
 };
