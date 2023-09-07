@@ -159,7 +159,12 @@ const clearOldCheckEvents = () => {
   Object.keys(events).forEach((key) => {
     const today = moment().hours(0).minutes(0).seconds(0);
 
-    if (!moment(events[key].date).isBefore(today, "day")) {
+    const { date, dateEnd } = events[key];
+
+    if (
+      !moment(date).isBefore(today, "day") ||
+      (dateEnd && moment(dateEnd).isAfter(today, "day"))
+    ) {
       actualEvents[key] = events[key];
       actualCheckin = [...actualCheckin, events[key].linkHref];
     }
