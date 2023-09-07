@@ -19,7 +19,7 @@ import { getLifeticketsEvents } from "./lifetickets.js";
 import { getTravels } from "./travel.js";
 import { getFilms } from "./films.js";
 
-const periodDays = 180;
+const periodDays = 60;
 
 const getEvents = async () => {
   clearOldEvents();
@@ -139,7 +139,12 @@ const clearOldEvents = () => {
   Object.keys(events).forEach((key) => {
     const today = moment().hours(0).minutes(0).seconds(0);
 
-    if (!moment(events[key].date).isBefore(today, "day")) {
+    const { date, dateEnd } = events[key];
+
+    if (
+      !moment(date).isBefore(today, "day") ||
+      (dateEnd && moment(dateEnd).isAfter(today, "day"))
+    ) {
       actualEvents[key] = events[key];
     }
   });
@@ -285,7 +290,7 @@ const getTodayFilmsEvent = async () =>
     ),
   })
     .then(({ data }) => {
-      getFilms(data);
+      getFilms(data, false);
     })
     .catch((e) => {
       if (e.message === "401") {

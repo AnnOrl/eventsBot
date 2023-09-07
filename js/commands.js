@@ -10,11 +10,12 @@ import {
   isTomorrowEvent,
   readFile,
   writeActualFile,
+  isNextDaysEvent,
 } from "./utils.js";
 import moment from "moment";
 import config from "../config.json" assert { type: "json" };
 import { chatGPTRequest, sendCheckEvent } from "./events/chatGPT.js";
-import { getTodayFilmsEvent } from "./events/getEvents.js";
+import { getEvents, getTodayFilmsEvent } from "./events/getEvents.js";
 
 moment.locale("ru");
 
@@ -134,6 +135,30 @@ const newCommand = async (message) => {
   }
 };
 
+const nextchecksCommand = async (message) => {
+  if (message.from.id !== +config.telegram.my_chat_id) {
+    return;
+  }
+
+  const filterName = 'ближайшие 30 дней'
+  const {
+    message_id,
+    chat: { id },
+  } = await sendMessage(`Ищу необработанные события на ${filterName}...`, message.from.id, {
+    disable_web_page_preview: true,
+  });
+
+  editMessageText(
+    getEventsText(filterEvents(isNextDaysEvent, true), filterName, true).text,
+    id,
+    message_id,
+    null,
+    {
+      disable_web_page_preview: true,
+    }
+  );
+
+};
 const reloadCommand = async (message) => {
   if (message.from.id !== +config.telegram.my_chat_id) {
     return;
@@ -145,6 +170,7 @@ const reloadCommand = async (message) => {
     "checkin",
     []
   );
+
   sendMessage(
     `История очищена`,
     message.from.id,
@@ -152,6 +178,8 @@ const reloadCommand = async (message) => {
       disable_web_page_preview: true,
     }
   );
+
+  await getEvents();
 };
 
 const todayCommand = async (message) => {
@@ -177,6 +205,7 @@ const commands = {
   "/films": getTodayFilmsEvent,
   "/newpost": newCommand,
   "/reload": reloadCommand,
+  "/nextchecks": nextchecksCommand,
 };
 
 export { commands };

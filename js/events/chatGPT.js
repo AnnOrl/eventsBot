@@ -6,6 +6,7 @@ import { waitOneHour } from "../utils.js";
 import { sendMarkup, sendMessage, sendPhoto } from "../tgApi.js";
 
 import { ChatGPTUnofficialProxyAPI } from "chatgpt";
+import { stopServer } from "../../bin/www.js";
 
 const api = new ChatGPTUnofficialProxyAPI({
   accessToken: config.accessToken,
@@ -91,10 +92,10 @@ const chatGPTRequest = async (
             category: categoryGPT,
             price: textPrice,
           } = JSON.parse(res?.text || {});
-
+          console.log(category, categoryGPT)
           return api.sendMessage(
-            `забудь про json. Добавь в начало поста следующую информацию, переведи при необходимости на русский язык: ${category !== "" || categoryGPT !== "" ? `\n🏷️ ${category || categoryGPT}` : ""
-            }${price !== "" || textPrice != ""
+            `забудь про json. Добавь в начало поста следующую информацию, переведи при необходимости на русский язык: ${(category && category !== "") || (categoryGPT && categoryGPT !== "") ? `\n🏷️ ${category || categoryGPT}` : ""
+            }${(!!price && price !== "") || (!!textPrice && textPrice != "")
               ? `\n💰 ${price || textPrice}`
               : ""
             }${!!textDate || date !== "" || !!filterDate
@@ -165,6 +166,7 @@ const chatGPTRequest = async (
         "Истек код авторизации ChatGPT",
         config.telegram.my_chat_id
       );
+      stopServer();
       throw new Error(e.statusCode);
     }
 

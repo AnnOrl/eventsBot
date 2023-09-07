@@ -57,6 +57,10 @@ const getITicketEvents = async ({ data }, date) => {
             .querySelector(".date-time-location .date")
             .textContent.replace(/\n/g, "");
 
+          if (dateS.length > 100) {
+            // close if dates to long -> strange event
+            return;
+          }
           const location = dom.window.document
             .querySelector(".date-time-location .location")
             .textContent.replace(/\n/g, "");

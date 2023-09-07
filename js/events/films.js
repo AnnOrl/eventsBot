@@ -15,7 +15,7 @@ import {
 } from "../utils.js";
 import { deleteMessage, sendFD, sendMessage, sendPhoto } from "../tgApi.js";
 
-const getFilms = async (data) => {
+const getFilms = async (data, checkEqual = true) => {
   try {
     const {
       filmsLinksNow = [],
@@ -106,7 +106,7 @@ const getFilms = async (data) => {
 
     const step = 6;
 
-    if (imageLinksNow !== [] && !isEqual(filmsLinksNow, imageLinksNow)) {
+    if (imageLinksNow !== [] && (!checkEqual || !isEqual(filmsLinksNow, imageLinksNow))) {
 
       if (imageLinksNow.length > step) {
         for (let i = 0; i < imageLinksNow.length; i += step) {
@@ -117,7 +117,7 @@ const getFilms = async (data) => {
         await sendMess('🍿 Сейчас в кино:', imageLinksNow, filmsNow)
       }
     }
-    if (imageLinksNew !== [] && !isEqual(filmsLinksNew !== imageLinksNew)) {
+    if (imageLinksNew !== [] && (!checkEqual || !isEqual(filmsLinksNew !== imageLinksNew))) {
       if (imageLinksNew.length > step) {
 
         for (let i = 0; i < imageLinksNew.length; i += step) {

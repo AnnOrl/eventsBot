@@ -4,22 +4,39 @@ import { createCanvas, loadImage } from 'canvas';
 const { isEmpty, set, sortBy } = pkg;
 
 import moment from "moment";
+import config from "../config.json" assert { type: "json" };
 moment.locale("ru");
 
 const isSameOrBetween = ({ target, prop, date, dateStart, dateEnd }) => {
+
   if (!dateStart || dateEnd === dateStart) {
-    return moment(date).isSame(target, prop);
+    if (prop) {
+      return moment(date).isSame(target, prop);
+    } else {
+      return moment(date).isBefore(target);
+    }
   }
   if (!dateEnd) {
-    return moment(new Date(dateStart + "-" + target.year())).isSame(
-      target,
-      prop
-    );
+    if (prop) {
+      return moment(new Date(dateStart + "-" + target.year())).isSame(
+        target,
+        prop
+      );
+    }
+    else {
+      return moment(new Date(dateStart + "-" + target.year())).isBefore(
+        target
+      );
+    }
   }
 
   const start = moment(new Date(dateStart + "-" + target.year()));
   const end = moment(new Date(dateEnd + "-" + target.year()));
-  return target.isSameOrBefore(end, prop) && target.isSameOrAfter(start, prop);
+  if (prop) {
+    return target.isSameOrBefore(end, prop) && target.isSameOrAfter(start, prop);
+  } else {
+    return target.isSameOrAfter(start)
+  }
 };
 
 const isTodayEvent = ({ date, dateStart, dateEnd }) => {
@@ -55,6 +72,18 @@ const isNextWeekEvent = ({ date, dateStart, dateEnd }) => {
     dateEnd,
     target: nextWeek,
     prop: "week",
+  });
+};
+
+const isNextDaysEvent = ({ date, dateStart, dateEnd }) => {
+  const nextDays = moment().add(30, "days");
+
+  // return moment(date).isSame(nextWeek, "week");
+  return isSameOrBetween({
+    date,
+    dateStart,
+    dateEnd,
+    target: nextDays,
   });
 };
 const isTomorrowEvent = ({ date, dateStart, dateEnd }) => {
@@ -124,8 +153,15 @@ function wait(time = 3000) {
   });
 }
 
-const filterEvents = (filterFn) => {
-  const { events } = readFile("data/events.json");
+const filterEvents = (filterFn, fromChecks = false) => {
+  let events;
+
+  if (fromChecks) {
+    events = readFile("data/check.json").events;
+  } else {
+    events = readFile("data/events.json").events;
+  }
+
   const sortedEvents = sortBy(events, "date");
 
   let filteredEvents = {};
@@ -156,7 +192,7 @@ const filterEvents = (filterFn) => {
   return filteredEvents;
 };
 
-const getEventsText = (eventsByDate, filterName) => {
+const getEventsText = (eventsByDate, filterName, fromChecks) => {
   let text = `Событий на ${filterName} не найдено.`;
   if (!isEmpty(eventsByDate)) {
     let eventsLinks = "";
@@ -165,7 +201,7 @@ const getEventsText = (eventsByDate, filterName) => {
       eventsLinks = eventsLinks + date + ": \n";
       Object.keys(eventsByDate[date]).forEach((time) => {
         Object.keys(eventsByDate[date][time]).forEach((href) => {
-          const { message_id, name, timeEvent } =
+          const { message_id, check_message_id, name, timeEvent } =
             eventsByDate[date][time][href];
 
           eventsLinks =
@@ -173,7 +209,7 @@ const getEventsText = (eventsByDate, filterName) => {
             "▪️ " +
             (timeEvent ? timeEvent + " - " : "") +
             '<a href="' +
-            (message_id ? "https://t.me/events_chisinau/" + message_id : href) +
+            ((message_id || check_message_id) ? "https://t.me/" + (fromChecks ? config.telegram.botLinkName : config.telegram.channelLinkName) + "/" + (message_id || check_message_id) : href) +
             '">' +
             name +
             "</a>" +
@@ -183,7 +219,7 @@ const getEventsText = (eventsByDate, filterName) => {
       eventsLinks = eventsLinks + "\n";
     });
 
-    text = `📅 Календарь событий на ${filterName}\n\n` + eventsLinks;
+    text = `📅 Календарь ${fromChecks ? 'необработанных ' : ''}событий на ${filterName}\n\n` + eventsLinks;
   }
 
   return { isFound: !isEmpty(eventsByDate), text };
@@ -287,7 +323,9 @@ function extractDateAndTimeAfisha(dateString) {
 }
 
 function extractDateAndTimeITickets(inputString) {
-  const dateRegex = /(\d{1,2})(?:\s*–\s*(\d{1,2}))?\s+([a-zа-яё]+)/gi;
+  // const dateRegex = /(\d{1,2})(?:\s*–\s*(\d{1,2}))?\s+([a-zа-яё]+)/gi;
+  const dateRegex = /(\d{1,2})(?:(?:,|\s*-\s*)\s*(\d{1,2}))*\s+([a-zа-яё]+)/gi;
+
   const timeRegex = /\d{1,2}:\d{2}/;
 
   const dateMatches = Array.from(inputString.matchAll(dateRegex));
@@ -583,6 +621,7 @@ export {
   isThisWeekEvent,
   isNextWeekEvent,
   isTomorrowEvent,
+  isNextDaysEvent,
   filterEvents,
   waitOneMinute,
   extractDateAndTimeAfisha,
