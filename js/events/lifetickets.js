@@ -14,17 +14,21 @@ moment.locale("ru");
 
 import { saveEvents } from "./parseEvents.js";
 
-const getLifeticketsEvents = async ({ data }, date) => {
+const getLifeticketsEvents = async (data) => {
   try {
-    console.log(
-      "\nАнализ LifeTickets, " + moment(date).format("DD MMMM"),
-      data.length
+
+    const dom = new JSDOM(data);
+    const links = dom.window.document.querySelectorAll(
+      ".HomeEvents_list__60Hqd a"
     );
-    for (let i = 0; i < data.length; i++) {
+    console.log(
+      "\nАнализ LifeTickets, ", links.length
+    );
+    for (let i = 0; i < links.length; i++) {
       const { events: savedEvents } = readFile("data/events.json");
       const { checkin = [] } = readFile("data/check.json");
 
-      const linkHref = "https://livetickets.md" + data[i].link;
+      const linkHref = "https://livetickets.md" + links[i].href;
 
       if (!savedEvents[linkHref] && checkin.indexOf(linkHref) === -1) {
         console.log("Запрашиваю подробности");
@@ -34,27 +38,24 @@ const getLifeticketsEvents = async ({ data }, date) => {
         }).then(async ({ data }) => {
           const dom = new JSDOM(data);
           const name =
-            dom.window.document.querySelector(".event-info h1").innerHTML;
+            dom.window.document.querySelector("h1").innerHTML;
           const img = dom.window.document.querySelector(
-            "picture[typeof=ImageObject] img"
+            "img[alt=Banner]"
           ).src;
 
           const text = dom.window.document.querySelector(
-            "article[property=description]"
+            ".Event_description__LFTSE"
           ).textContent;
-          const price = dom.window.document
-            .querySelector("div[property=offers]")
-            .textContent.replace(/\n/g, "")
-            .replace(/  /g, "");
+          const price = "";
           const match = dom.window.document
-            .querySelector("div[property=startDate]")
+            .querySelector("h1 + p>span")
             .textContent.replace(/\n/g, "");
 
           const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
-            extractDateAndTimeLifetickets(match);
+            extractDateAndTimeLifetickets(match) || {};
 
           const location = dom.window.document
-            .querySelector("div[typeof=Place] div[property=name]")
+            .querySelector("h1 + p span:last-child")
             .textContent.replace(/\n/g, "");
 
           await saveEvents(
@@ -64,7 +65,7 @@ const getLifeticketsEvents = async ({ data }, date) => {
               price: price ? price : "",
               text,
               linkHref,
-              date,
+              date: dateStart,
               timeEvent,
               location,
               hEvent,

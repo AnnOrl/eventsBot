@@ -23,7 +23,7 @@ const saveEvents = async (
   },
   sameName
 ) => {
-  const { message_id: check_message_id, text: postText } = await chatGPTRequest(
+  const { message_id: check_message_id, text: postText, prevText } = await chatGPTRequest(
     {
       img,
       name,
@@ -53,6 +53,7 @@ const saveEvents = async (
     location,
     linkHref,
     postText,
+    prevText,
     dateStart,
     dateEnd,
     timeEvent,

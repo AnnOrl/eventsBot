@@ -48,7 +48,7 @@ const getITicketEvents = async ({ data }, date) => {
           ).textContent;
           const price = dom.window.document
             .querySelector(".price_title")
-            .textContent.replace(/\n/g, "");
+            ?.textContent.replace(/\n/g, "") || '';
           const timeS = dom.window.document
             .querySelector(".date-time-location .time")
             .textContent.replace(/\n/g, "");
@@ -65,14 +65,19 @@ const getITicketEvents = async ({ data }, date) => {
             .querySelector(".date-time-location .location")
             .textContent.replace(/\n/g, "");
 
+          const extDate = extractDateAndTimeITickets(dateS + " " + timeS);
+
+          if (!extDate) {
+            return;
+          }
           const { dateStart, dateEnd, hEvent, mEvent, timeEvent, textDate } =
-            extractDateAndTimeITickets(dateS + " " + timeS);
+            extDate;
 
           await saveEvents(
             {
               img,
               name,
-              price: price !== " лей" && price !== "  лей" ? price : "",
+              price: !!price && price !== " лей" && price !== "  лей" ? price : "",
               text,
               linkHref,
               date,

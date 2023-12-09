@@ -35,7 +35,7 @@ const getUpdates = () => {
           if (callback_query) {
             const action = callback_query.data.split("|")[0];
             actions[action] && actions[action](callback_query);
-          } else if (message) {
+          } else if (message && message.text) {
             const command = message.text.split(" ")[0];
             commands[command] && commands[command](message);
           }

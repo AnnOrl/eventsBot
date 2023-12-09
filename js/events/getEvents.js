@@ -19,7 +19,7 @@ import { getLifeticketsEvents } from "./lifetickets.js";
 import { getTravels } from "./travel.js";
 import { getFilms } from "./films.js";
 
-const periodDays = 60;
+const periodDays = 30;
 
 const getEvents = async () => {
   clearOldEvents();
@@ -34,6 +34,49 @@ const getEvents = async () => {
     .then(({ data }) => {
       return getTravels(data);
     })
+    .catch((e) => {
+      if (e.message === "401") {
+        throw e;
+      }
+      console.log("Ошибка получения обновлений", e);
+    });
+
+  await axios({
+    method: "get",
+    url: encodeURI(
+      `https://livetickets.md/ru`
+    ),
+  })
+    // .then(({ data }) => getLifeticketsEvents(data)) // TODO
+    // await axios({
+    //   method: "get",
+    //   url: encodeURI(
+    //     `https://api.livetickets.md/api/timetables?page=1&city=All&from=${formatDateLT}&to=${formatDateLT}`
+    //   ),
+    //   headers: {
+    //     Accept: "application/json, text/plain, */*",
+    //     "Accept-Encoding": "gzip, deflate, br",
+    //     "Accept-language": "ru",
+    //     "Cache-Control": "no-cache",
+    //     Connection: "keep-alive",
+    //     Host: "api.livetickets.md",
+    //     Origin: "https://livetickets.md",
+    //     Pragma: "no-cache",
+    //     Referer: "https://livetickets.md/",
+    //     "Sec-Fetch-Dest": "empty",
+    //     "Sec-Fetch-Mode": "cors",
+    //     "Sec-Fetch-Site": "same-site",
+    //     "User-Agent":
+    //       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+    //     "X-API-KEY":
+    //       "a2dOlfPITF63PnSpXVSdlPtiZZRVGf3BaNk4dgylRE3GMmJOrBjfXFvs5tGu",
+    //     "sec-ch-ua":
+    //       '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+    //     "sec-ch-ua-mobile": "?0",
+    //     "sec-ch-ua-platform": '"macOS"',
+    //   },
+    // })
+    //   .then(({ data }) => getLifeticketsEvents(data?.data?.timetables, date))
     .catch((e) => {
       if (e.message === "401") {
         throw e;
@@ -93,42 +136,6 @@ const getEvents = async () => {
         }
         console.log("Ошибка получения обновлений", e);
       });
-
-    await axios({
-      method: "get",
-      url: encodeURI(
-        `https://api.livetickets.md/api/timetables?page=1&city=All&from=${formatDateLT}&to=${formatDateLT}`
-      ),
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-language": "ru",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        Host: "api.livetickets.md",
-        Origin: "https://livetickets.md",
-        Pragma: "no-cache",
-        Referer: "https://livetickets.md/",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-site",
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-        "X-API-KEY":
-          "a2dOlfPITF63PnSpXVSdlPtiZZRVGf3BaNk4dgylRE3GMmJOrBjfXFvs5tGu",
-        "sec-ch-ua":
-          '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": '"macOS"',
-      },
-    })
-      .then(({ data }) => getLifeticketsEvents(data?.data?.timetables, date))
-      .catch((e) => {
-        if (e.message === "401") {
-          throw e;
-        }
-        console.log("Ошибка получения обновлений", e);
-      });
   }
 };
 
@@ -137,7 +144,7 @@ const clearOldEvents = () => {
   const actualEvents = {};
 
   Object.keys(events).forEach((key) => {
-    const today = moment().hours(0).minutes(0).seconds(0);
+    const today = moment().hours(23).minutes(59).seconds(59);
 
     const { date, dateEnd } = events[key];
 
@@ -289,13 +296,13 @@ const getTodayEvents = () => {
 
 const getTodayFilmsEvent = async () =>
   await axios({
-    method: "get",
+    method: "post",
     url: encodeURI(
-      `https://cineplex.md/films?display=now&` + moment().format('YYYY-MM-DD')
+      `https://cineplex.md/api/getMoviesFiltered`
     ),
   })
     .then(({ data }) => {
-      getFilms(data, false);
+      getFilms(data.movies, false);
     })
     .catch((e) => {
       if (e.message === "401") {

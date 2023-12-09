@@ -1,6 +1,6 @@
 import pkg from "lodash";
 const { isEmpty, set, sortBy } = pkg;
-import { editMessageText, sendMessage } from "./tgApi.js";
+import { editMessageText, pinChatMessage, sendMessage, unpinAllChatMessages } from "./tgApi.js";
 import {
   filterEvents,
   getEventsText,
@@ -139,8 +139,10 @@ const nextchecksCommand = async (message) => {
   if (message.from.id !== +config.telegram.my_chat_id) {
     return;
   }
+  const count = Number(message.text?.replace("/nextchecks ", "")) || 5;
 
-  const filterName = 'ближайшие 30 дней'
+  const filterName = `ближайшие ${count} дней`
+
   const {
     message_id,
     chat: { id },
@@ -148,8 +150,22 @@ const nextchecksCommand = async (message) => {
     disable_web_page_preview: true,
   });
 
+  const eventsByDate = filterEvents(isNextDaysEvent(count), true);
+
+  await unpinAllChatMessages(message.from.id);
+
+  Object.keys(eventsByDate).forEach((date) => {
+    Object.keys(eventsByDate[date]).forEach((time) => {
+      Object.keys(eventsByDate[date][time]).forEach(async (href) => {
+        const { check_message_id } = eventsByDate[date][time][href];
+
+        await pinChatMessage(id, check_message_id);
+      });
+    });
+  });
+
   editMessageText(
-    getEventsText(filterEvents(isNextDaysEvent, true), filterName, true).text,
+    getEventsText(eventsByDate, filterName, true).text,
     id,
     message_id,
     null,

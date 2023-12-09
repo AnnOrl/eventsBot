@@ -17,6 +17,8 @@ import { deleteMessage, sendFD, sendMessage, sendPhoto } from "../tgApi.js";
 
 const getFilms = async (data, checkEqual = true) => {
   try {
+
+
     const {
       filmsLinksNow = [],
       filmsLinksNew = [],
@@ -26,28 +28,27 @@ const getFilms = async (data, checkEqual = true) => {
       "\nПоиск фильмов"
     );
 
-    const dom = new JSDOM(data);
-    const filmsList = dom.window.document.querySelectorAll('.movies_blcks');
     let filmsNow = [];
     let filmsNew = [];
     let imageLinksNow = [];
     let imageLinksNew = [];
 
-    for (let i = 0; i < filmsList.length; i++) {
-      const link = filmsList[i].querySelector('div').getAttribute('data-href');
-      const img = filmsList[i].querySelector('img').src;
-      const name = filmsList[i].querySelector('.overlay__title').innerHTML.replace('\n', ' ');
-      const lang = filmsList[i].querySelector('.overlay__lang').innerHTML.replace('\n', '');
-      const genre = filmsList[i].querySelector('.overlay__genre').innerHTML.replace('\n', '');
-      const matches = filmsList[i].querySelector('.startdate').innerHTML.replace(/[()]/g, '').match(/\d+/g);
+    for (let i = 0; i < data.length; i++) {
+      const link = data[i].link;
+      const img = data[i].poster;
+      const name = data[i].title_ru;
+      const lang = data[i].language;
+      const genre = data[i].genre_ru;
+      const date = data[i].release_date;
+      const trailer = data[i].trailer;
 
-      const startdate = moment(`${matches[2]}-${matches[1]}-${matches[0]}`)
+      const startdate = moment(date)
 
-      if (filmsList[i].getAttribute('data-time') === 'now') {
+      if (moment().isAfter(startdate)) {
         const sameFilm = filmsNow.findIndex((el) => el.name === name)
         if (sameFilm === -1) {
           imageLinksNow.push(img);
-          filmsNow.push({ link: [link], img, name, lang: [lang], genre, startdate });
+          filmsNow.push({ link: [link], img, name, lang: [lang], genre, startdate, trailer });
         } else {
           filmsNow[sameFilm].lang = [...filmsNow[sameFilm].lang, lang]
           filmsNow[sameFilm].link = [...filmsNow[sameFilm].link, link]
@@ -56,13 +57,51 @@ const getFilms = async (data, checkEqual = true) => {
         const sameFilm = filmsNew.findIndex((el) => el.name === name)
         if (sameFilm === -1) {
           imageLinksNew.push(img);
-          filmsNew.push({ link: [link], img, name, lang: [lang], genre, startdate });
+          filmsNew.push({ link: [link], img, name, lang: [lang], genre, startdate, trailer });
         } else {
           filmsNew[sameFilm].lang = [...filmsNew[sameFilm].lang, lang]
           filmsNew[sameFilm].link = [...filmsNew[sameFilm].link, link]
         }
       }
     }
+
+    // const dom = new JSDOM(data);
+    // const filmsList = dom.window.document.querySelectorAll('.movies_blcks');
+    // let filmsNow = [];
+    // let filmsNew = [];
+    // let imageLinksNow = [];
+    // let imageLinksNew = [];
+
+    // for (let i = 0; i < filmsList.length; i++) {
+    //   const link = filmsList[i].querySelector('div').getAttribute('data-href');
+    //   const img = filmsList[i].querySelector('img').src;
+    //   const name = filmsList[i].querySelector('.overlay__title').innerHTML.replace('\n', ' ');
+    //   const lang = filmsList[i].querySelector('.overlay__lang').innerHTML.replace('\n', '');
+    //   const genre = filmsList[i].querySelector('.overlay__genre').innerHTML.replace('\n', '');
+    //   const matches = filmsList[i].querySelector('.startdate').innerHTML.replace(/[()]/g, '').match(/\d+/g);
+
+    //   const startdate = moment(`${matches[2]}-${matches[1]}-${matches[0]}`)
+
+    //   if (filmsList[i].getAttribute('data-time') === 'now') {
+    //     const sameFilm = filmsNow.findIndex((el) => el.name === name)
+    //     if (sameFilm === -1) {
+    //       imageLinksNow.push(img);
+    //       filmsNow.push({ link: [link], img, name, lang: [lang], genre, startdate });
+    //     } else {
+    //       filmsNow[sameFilm].lang = [...filmsNow[sameFilm].lang, lang]
+    //       filmsNow[sameFilm].link = [...filmsNow[sameFilm].link, link]
+    //     }
+    //   } else if (moment().add(14, 'days').isAfter(startdate)) {
+    //     const sameFilm = filmsNew.findIndex((el) => el.name === name)
+    //     if (sameFilm === -1) {
+    //       imageLinksNew.push(img);
+    //       filmsNew.push({ link: [link], img, name, lang: [lang], genre, startdate });
+    //     } else {
+    //       filmsNew[sameFilm].lang = [...filmsNew[sameFilm].lang, lang]
+    //       filmsNew[sameFilm].link = [...filmsNew[sameFilm].link, link]
+    //     }
+    //   }
+    // }
 
     const sendMess = async (text, imageLinks, films) => {
       const collageBuffer = await createImageCollage(imageLinks);
@@ -92,7 +131,7 @@ const getFilms = async (data, checkEqual = true) => {
           dateStart = '\n 📅 C ' + moment(film.startdate).format('D MMMM');
         }
 
-        messageText = messageText + `🎬 <b>${film.name}</b>\n<i>🎭 ${film.genre}</i>\n🗣️ ${filmEntries}${dateStart}\n\n`
+        messageText = messageText + `🎬 <b>${film.name}</b>\n<i>🎭 ${film.genre}</i>\n${film.trailer ? `🔗 <a href="${film.trailer}">Смотреть трейлер</a>\n` : ''}🗣️ ${filmEntries}${dateStart}\n\n`
       })
 
 

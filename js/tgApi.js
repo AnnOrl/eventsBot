@@ -197,6 +197,53 @@ const deleteMessage = (chat_id, message_id) => {
     });
 };
 
+const pinChatMessage = (chat_id, message_id) => {
+  if (process.env.MODE === "local") {
+    console.log("pinChatMessage", message_id);
+    return { message_id: 0 };
+  }
+
+  return axios({
+    method: "post",
+    url: encodeURI(`${config.apiTG}${config.telegram.token}/pinChatMessage`),
+    data: {
+      message_id,
+      chat_id,
+      disable_notification: true
+    },
+  })
+    .then(({ data }) => {
+      console.log("pinChatMessage");
+
+      return data.result;
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+};
+const unpinAllChatMessages = (chat_id) => {
+  if (process.env.MODE === "local") {
+    console.log("unpinAllChatMessages");
+    return {};
+  }
+
+  return axios({
+    method: "post",
+    url: encodeURI(`${config.apiTG}${config.telegram.token}/unpinAllChatMessages`),
+    data: {
+      chat_id,
+    },
+  })
+    .then(({ data }) => {
+      console.log("unpinAllChatMessages");
+
+      return data.result;
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+};
+
 const sendMarkup = (
   text,
   inline_keyboard,
@@ -242,5 +289,7 @@ export {
   deleteMessage,
   sendPhoto,
   sendFD,
-  copyMessage
+  copyMessage,
+  pinChatMessage,
+  unpinAllChatMessages
 };

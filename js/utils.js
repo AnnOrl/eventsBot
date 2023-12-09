@@ -75,8 +75,8 @@ const isNextWeekEvent = ({ date, dateStart, dateEnd }) => {
   });
 };
 
-const isNextDaysEvent = ({ date, dateStart, dateEnd }) => {
-  const nextDays = moment().add(30, "days");
+const isNextDaysEvent = (count) => ({ date, dateStart, dateEnd }) => {
+  const nextDays = moment().add(count, "days");
 
   // return moment(date).isSame(nextWeek, "week");
   return isSameOrBetween({
@@ -323,8 +323,8 @@ function extractDateAndTimeAfisha(dateString) {
 }
 
 function extractDateAndTimeITickets(inputString) {
-  // const dateRegex = /(\d{1,2})(?:\s*–\s*(\d{1,2}))?\s+([a-zа-яё]+)/gi;
-  const dateRegex = /(\d{1,2})(?:(?:,|\s*-\s*)\s*(\d{1,2}))*\s+([a-zа-яё]+)/gi;
+  const dateRegex = /(\d{1,2})(?:\s*–\s*(\d{1,2}))?\s+([a-zа-яё]+)/gi;
+  // const dateRegex = /(\d{1,2})(?:(?:,|\s*-\s*)\s*(\d{1,2}))*\s+([a-zа-яё]+)/gi;
 
   const timeRegex = /\d{1,2}:\d{2}/;
 
@@ -420,6 +420,7 @@ function extractDateAndTimeTravel(inputString) {
 
 const getSameName = (name, savedEvents) => {
   let sameName = null;
+  let sameLength = 0.4;
 
   for (let k = 0; k < Object.keys(savedEvents).length; k++) {
     const name1 = name.replaceAll(" ", "").toLowerCase();
@@ -427,9 +428,16 @@ const getSameName = (name, savedEvents) => {
       .replaceAll(" ", "")
       .toLowerCase();
 
-    if (name1 === name2 || similarity(name1, name2) > 0.4) {
+    if (name1 === name2) {
       sameName = savedEvents[Object.keys(savedEvents)[k]].message_id;
       break;
+    }
+
+    const currentLength = similarity(name1, name2);
+
+    if (similarity(name1, name2) > sameLength) {
+      sameLength = currentLength;
+      sameName = savedEvents[Object.keys(savedEvents)[k]].message_id;
     }
   }
 
@@ -603,13 +611,52 @@ function boxBlur(canvas, radius) {
 
 
 
+function truncateTextToLastDot(inputString) {
+  // Find the index of the last dot in the string
+  const lastDotIndex = inputString.lastIndexOf('.');
+
+  // If a dot is found, truncate the string up to that point
+  if (lastDotIndex !== -1) {
+    const truncatedText = inputString.substring(0, lastDotIndex + 1);
+    return truncatedText;
+  } else {
+    // If no dot is found, return the original string
+    return inputString;
+  }
+}
+
+function detectTextLanguage(text) {
+  // Regular expression to check for Russian letters
+  const russianLetters = /[а-яА-ЯЁё]/;
+
+  // Regular expression to check for English letters
+  const englishLetters = /[a-zA-Z]/;
+
+  // Check for the presence of Russian and English letters in the text
+  const hasRussianLetters = russianLetters.test(text);
+  const hasEnglishLetters = englishLetters.test(text);
+
+  // Return the result
+  if (hasRussianLetters && hasEnglishLetters) {
+    return "mixed";
+  } else if (hasRussianLetters) {
+    return "russian";
+  } else if (hasEnglishLetters) {
+    return "english";
+  } else {
+    return "unknown";
+  }
+}
 
 
-
-
-
+function isRuTextLanguage(text) {
+  return detectTextLanguage(text) === 'mixed' || detectTextLanguage(text) === 'russian'
+}
 
 export {
+  isRuTextLanguage,
+  detectTextLanguage,
+  truncateTextToLastDot,
   getSameName,
   writeActualFile,
   readFile,
